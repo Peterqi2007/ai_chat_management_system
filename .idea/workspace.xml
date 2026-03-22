@@ -4,17 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/ai_secure_chat.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/static/chat/js/chat.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/detail.html" afterDir="false" />
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="创建ai_secure_chat项目">
+      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,17 +21,22 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="3AyHp5myhAD2onGJn7TmFiy0ubo" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -46,7 +48,7 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master"
+    "git-widget-placeholder": "new"
   }
 }]]></component>
   <component name="SharedIndexes">

@@ -6,7 +6,7 @@
 import logging
 from typing import Generator, List, Dict
 from django.conf import settings
-from openai import OpenAI, APIError, ConnectionError, Timeout
+from openai import OpenAI, APIError, APIConnectionError, APITimeoutError
 
 # 配置日志（复用 Django 日志）
 logger = logging.getLogger(__name__)
@@ -63,16 +63,16 @@ def minimax_stream_chat(
                 yield content
 
     # 异常处理（前端友好提示）
-    except APIError as e:
-        error_msg = f"Minimax API 错误: {e.message} (code: {e.status_code})"
+    except APITimeoutError:
+        error_msg = "请求超时，Minimax 服务器响应缓慢"
         logger.error(error_msg)
         yield f"[错误] {error_msg}"
-    except ConnectionError:
+    except APIConnectionError:
         error_msg = "网络连接失败，请检查网络后重试"
         logger.error(error_msg)
         yield f"[错误] {error_msg}"
-    except Timeout:
-        error_msg = "请求超时，Minimax 服务器响应缓慢"
+    except APIError as e:
+        error_msg = f"Minimax API 错误: {e.message} (code: {e.status_code})"
         logger.error(error_msg)
         yield f"[错误] {error_msg}"
     except Exception as e:

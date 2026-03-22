@@ -225,6 +225,9 @@ TEMPLATES = [
 INSTALLED_APPS = [
     #项目专属应用
     "chat",
+    #其他应用
+    "taggit",
+    "mezzanine.accounts",
 
     "django.contrib.admin",
     "django.contrib.auth",

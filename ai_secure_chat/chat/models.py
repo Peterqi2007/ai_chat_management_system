@@ -1,37 +1,152 @@
-import mezzanine.core.models
 from django.db import models
 from django.contrib.auth.models import User
-from mezzanine.pages.models import Page
+from django.utils import timezone
 
+# ==============================================
+# 1. 用户扩展资料模型（核心：隐私密码、用户偏好）
+# 关联Django内置User模型，实现业务需求的加密/个性化配置
+# ==============================================
+class UserProfile(models.Model):
+    # 一对一关联系统用户，用户删除则资料同步删除
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="所属用户")
+    # 隐私对话密码（哈希存储，绝不存明文！）
+    privacy_password_hash = models.CharField(max_length=256, blank=True, null=True, verbose_name="隐私密码哈希")
+    # 默认使用的大模型名称
+    default_model = models.CharField(max_length=50, default="minimax", verbose_name="默认大模型")
+    # 创建/更新时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
 
-# 1. 对话分类模型
-class ConversationCategory(mezzanine.core.models.Orderable):
-    name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # 可以继承 Mezzanine 的 Orderable 来实现拖拽排序
+    class Meta:
+        verbose_name = "用户资料"
+        verbose_name_plural = "用户资料"
 
+    def __str__(self):
+        return f"{self.user.username} 的资料"
 
-# 2. 对话会话模型
-class Conversation(models.Model):
-    title = models.CharField(max_length=200)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="conversations")
-    category = models.ForeignKey(ConversationCategory, null=True, blank=True, on_delete=models.SET_NULL)
+# ==============================================
+# 2. 顶级分类模型（一级目录：如 工作、生活、学习）
+# 归属用户，用于文件夹的顶级分类
+# ==============================================
+class Category(models.Model):
+    # 所属用户
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="categories", verbose_name="所属用户")
+    # 分类名称
+    name = models.CharField(max_length=100, verbose_name="分类名称")
+    # 排序序号（支持拖动排序）
+    order = models.IntegerField(default=0, verbose_name="排序序号")
+    # 创建时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
-    # 核心需求：密码控制查看
-    is_hidden = models.BooleanField(default=False)
-    view_password = models.CharField(max_length=128, blank=True, null=True)  # 建议存入加密后的哈希值
+    class Meta:
+        verbose_name = "分类"
+        verbose_name_plural = "分类"
+        ordering = ["order", "created_at"]  # 默认按排序+时间展示
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name
 
+# ==============================================
+# 3. 文件夹模型（二级目录，支持无限嵌套）
+# 核心：支持加密、归属分类/父文件夹，用于管理对话条目
+# ==============================================
+class Folder(models.Model):
+    # 所属用户
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="folders", verbose_name="所属用户")
+    # 所属顶级分类（可为空，允许无分类）
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="folders", blank=True, null=True, verbose_name="所属分类")
+    # 父文件夹（支持嵌套子文件夹，为空则为一级文件夹）
+    parent_folder = models.ForeignKey("self", on_delete=models.CASCADE, related_name="child_folders", blank=True, null=True, verbose_name="父文件夹")
+    # 文件夹名称
+    name = models.CharField(max_length=100, verbose_name="文件夹名称")
+    # 排序序号
+    order = models.IntegerField(default=0, verbose_name="排序序号")
+    # 创建时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
-# 3. 对话消息模型
-class Message(models.Model):
+    class Meta:
+        verbose_name = "文件夹"
+        verbose_name_plural = "文件夹"
+        ordering = ["order", "created_at"]
+
+    def __str__(self):
+        return self.name
+
+# ==============================================
+# 4. 对话条目模型（核心业务：单个对话会话）
+# 归属文件夹，存储对话标题、系统提示词、模型参数
+# ==============================================
+class ChatEntry(models.Model):
+    # 所属用户
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_entries", verbose_name="所属用户")
+    # 所属文件夹
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name="chat_entries", verbose_name="所属文件夹")
+    # 对话标题
+    title = models.CharField(max_length=200, verbose_name="对话标题")
+    # 系统提示词（大模型角色设定）
+    system_prompt = models.TextField(blank=True, default="你是一个智能助手", verbose_name="系统提示词")
+    # 大模型调用参数
+    temperature = models.FloatField(default=0.7, verbose_name="温度参数")
+    top_p = models.FloatField(default=0.9, verbose_name="TopP参数")
+    max_tokens = models.IntegerField(default=2048, verbose_name="最大Token")
+    # 是否为隐私对话
+    is_private = models.BooleanField(default=False, verbose_name="是否隐私对话")
+    # 创建/更新时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+
+    class Meta:
+        verbose_name = "对话条目"
+        verbose_name_plural = "对话条目"
+        ordering = ["-updated_at"]  # 最新修改的对话排在前面
+
+    def __str__(self):
+        return self.title
+
+# ==============================================
+# 5. 对话消息模型（对话内容：用户提问 + AI回复）
+# 支持流式输出标记，存储完整对话历史
+# ==============================================
+class ChatMessage(models.Model):
     ROLE_CHOICES = (
-        ('user', 'User'),
-        ('assistant', 'AI'),
+        ("user", "用户"),
+        ("assistant", "AI助手"),
     )
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    # 所属对话条目
+    chat_entry = models.ForeignKey(ChatEntry, on_delete=models.CASCADE, related_name="messages", verbose_name="所属对话")
+    # 消息角色（用户/AI）
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, verbose_name="消息角色")
+    # 消息内容
+    content = models.TextField(verbose_name="消息内容")
+    # 是否为流式输出消息
+    is_stream = models.BooleanField(default=False, verbose_name="是否流式输出")
+    # 创建时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="发送时间")
+
+    class Meta:
+        verbose_name = "对话消息"
+        verbose_name_plural = "对话消息"
+        ordering = ["created_at"]  # 按时间正序展示对话
+
+    def __str__(self):
+        return f"{self.get_role_display()}：{self.content[:30]}..." #疑似错误点 高度关注
+
+# ==============================================
+# 6. 大模型参数配置模型（可选：全局/自定义参数模板）
+# 方便用户快速复用参数配置
+# ==============================================
+class ModelConfig(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="model_configs", blank=True, null=True, verbose_name="所属用户")
+    name = models.CharField(max_length=100, verbose_name="配置名称")
+    model_name = models.CharField(max_length=50, default="minimax", verbose_name="模型名称")
+    temperature = models.FloatField(default=0.7, verbose_name="温度参数")
+    top_p = models.FloatField(default=0.9, verbose_name="TopP参数")
+    max_tokens = models.IntegerField(default=2048, verbose_name="最大Token")
+    is_global = models.BooleanField(default=False, verbose_name="是否全局配置")
+
+    class Meta:
+        verbose_name = "模型参数配置"
+        verbose_name_plural = "模型参数配置"
+
+    def __str__(self):
+        return self.name
