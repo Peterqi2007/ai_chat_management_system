@@ -8,11 +8,13 @@ from django.utils import timezone
 # ==============================================
 class UserProfile(models.Model):
     # 一对一关联系统用户，用户删除则资料同步删除
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="所属用户")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, verbose_name="所属用户")
     # 隐私对话密码（哈希存储，绝不存明文！）
-    privacy_password_hash = models.CharField(max_length=256, blank=True, null=True, verbose_name="隐私密码哈希")
+    privacy_password_hash = models.CharField(max_length=256, blank=True, default='', verbose_name="隐私密码哈希")
     # 默认使用的大模型名称
-    default_model = models.CharField(max_length=50, default="minimax", verbose_name="默认大模型")
+    default_model = models.CharField(max_length=50, default="minimax", blank=True, verbose_name="默认大模型")
+    # api 密钥
+    api_key = models.CharField(max_length=256, default='', verbose_name="api密钥")
     # 创建/更新时间
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
@@ -119,7 +121,7 @@ class ChatMessage(models.Model):
     # 消息内容
     content = models.TextField(verbose_name="消息内容")
     # 是否为流式输出消息
-    is_stream = models.BooleanField(default=False, verbose_name="是否流式输出")
+    is_stream = models.BooleanField(default=True, verbose_name="是否流式输出")
     # 创建时间
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="发送时间")
 

@@ -22,7 +22,7 @@ class ChatMessageInline(admin.TabularInline):
 # ==============================================
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "default_model", "created_at")
+    list_display = ("user", "default_model", "api_key", "created_at")
     search_fields = ("user__username",)
     readonly_fields = ("created_at", "updated_at")
 
