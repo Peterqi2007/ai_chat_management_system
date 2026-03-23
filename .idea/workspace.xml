@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="创建ai_secure_chat项目">
-      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" afterDir="false" />
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="重新找豆包建立models">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,9 +44,15 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "new"
+    "git-widget-placeholder": "new",
+    "last_opened_file_path": "E:/ai_secure_chat"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\ai_secure_chat" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -66,6 +68,19 @@
       <option name="presentableId" value="Default" />
       <updated>1773558069488</updated>
     </task>
+    <task id="LOCAL-00001" summary="重新找豆包建立models">
+      <option name="closed" value="true" />
+      <created>1774186673848</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1774186673848</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="重新找豆包建立models" />
+    <option name="LAST_COMMIT_MESSAGE" value="重新找豆包建立models" />
   </component>
 </project>
