@@ -1,81 +1,121 @@
-"""
-大模型 API 服务层
-功能：Minimax 流式响应、参数配置、异常处理、日志记录
-适配：OpenAI SDK v1.0+ / Django/Mezzanine
-"""
-import logging
-from typing import Generator, List, Dict
+from openai import OpenAI
 from django.conf import settings
-from openai import OpenAI, APIError, APIConnectionError, APITimeoutError
+from .models import UserProfile, ChatEntry, ChatMessage
 
-# 配置日志（复用 Django 日志）
-logger = logging.getLogger(__name__)
+# ==============================================
+# 千问API 核心配置（固定，官方要求）
+# ==============================================
+QWEN_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEFAULT_MODEL = "qwen-plus"  # 默认千问模型
 
-# 初始化 OpenAI 客户端（适配 Minimax 兼容接口）
-client = OpenAI(
-    api_key=settings.LLM_API_KEY,
-    base_url=settings.LLM_BASE_URL,
-    # 超时设置，避免请求阻塞
-    timeout=60.0
-)
 
-def minimax_stream_chat(
-    messages: List[Dict[str, str]],
-    temperature: float = None,
-    max_tokens: int = None,
-    top_p: float = None
-) -> Generator[str, None, None]:
+# ==============================================
+# 1. 获取千问客户端（核心：读取用户自己的API Key）
+# 从 UserProfile 中获取用户存储的 api_key
+# ==============================================
+def get_qwen_client(user):
     """
-    Minimax 流式对话接口
-    :param messages: 对话历史 [{"role": "user"/"assistant", "content": "xxx"}, ...]
-    :param temperature: 温度系数 (0-1)，值越高越随机，越低越精准
-    :param max_tokens: 最大生成 token 数
-    :param top_p: 核采样参数
-    :return: 流式生成器 (yield 字符串片段)
+    根据当前用户，获取专属的千问API客户端
+    :param user: Django User 对象
+    :return: OpenAI 客户端实例
     """
-    # 优先级：传入参数 > settings 默认参数
-    temperature = temperature or settings.LLM_DEFAULT_TEMPERATURE
-    max_tokens = max_tokens or settings.LLM_DEFAULT_MAX_TOKENS
-    top_p = top_p or settings.LLM_DEFAULT_TOP_P
+    try:
+        # 获取用户的扩展资料
+        profile = UserProfile.objects.get(user=user)
+        # 校验用户是否配置了API Key
+        if not profile.api_key:
+            raise ValueError("请先在个人资料中配置千问API Key！")
+
+        # 初始化千问客户端（官方标准写法）
+        client = OpenAI(
+            api_key=profile.api_key,
+            base_url=QWEN_BASE_URL
+        )
+        return client
+
+    except UserProfile.DoesNotExist:
+        raise ValueError("用户资料不存在，请先创建用户资料！")
+
+
+# ==============================================
+# 2. 流式对话生成（项目核心需求：前端实时输出）
+# 传入对话条目ChatEntry，自动加载所有配置+历史消息
+# 返回生成器，支持SSE流式响应
+# ==============================================
+def stream_chat_completion(chat_entry: ChatEntry, user_message: str):
+    """
+    千问流式对话
+    :param chat_entry: 对话条目对象（携带系统提示词、模型参数）
+    :param user_message: 用户最新输入的消息
+    :return: 流式响应生成器
+    """
+    # 1. 获取客户端
+    client = get_qwen_client(chat_entry.user)
+
+    # 2. 构建消息列表（系统提示词 + 历史对话 + 当前用户消息）
+    messages = []
+
+    # 系统提示词（来自 ChatEntry 模型）
+    messages.append({
+        "role": "system",
+        "content": chat_entry.system_prompt
+    })
+
+    # 历史对话消息（按时间正序，来自 ChatMessage 模型）
+    for msg in chat_entry.messages.all():
+        messages.append({
+            "role": msg.role,
+            "content": msg.content
+        })
+
+    # 用户最新提问
+    messages.append({
+        "role": "user",
+        "content": user_message
+    })
+
+    # 3. 调用千问流式API（官方标准参数）
+    try:
+        stream = client.chat.completions.create(
+            model=DEFAULT_MODEL,
+            messages=messages,
+            temperature=chat_entry.temperature,
+            top_p=chat_entry.top_p,
+            max_tokens=chat_entry.max_tokens,
+            stream=True  # 开启流式输出
+        )
+        return stream
+
+    except Exception as e:
+        raise Exception(f"千问API调用失败：{str(e)}")
+
+
+# ==============================================
+# 3. 普通非流式对话（备用接口）
+# ==============================================
+def chat_completion(chat_entry: ChatEntry, user_message: str):
+    """
+    千问非流式对话（备用）
+    """
+    client = get_qwen_client(chat_entry.user)
+
+    messages = [
+        {"role": "system", "content": chat_entry.system_prompt}
+    ]
+    for msg in chat_entry.messages.all():
+        messages.append({"role": msg.role, "content": msg.content})
+    messages.append({"role": "user", "content": user_message})
 
     try:
-        # 调用 Minimax 流式接口（核心：stream=True）
-        response = client.chat.completions.create(
-            model=settings.LLM_MODEL,
+        completion = client.chat.completions.create(
+            model=DEFAULT_MODEL,
             messages=messages,
-            stream=True,  # 开启流式响应
-            temperature=temperature,
-            max_tokens=max_tokens,
-            top_p=top_p,
-            frequency_penalty=settings.LLM_DEFAULT_FREQUENCY_PENALTY,
-            presence_penalty=settings.LLM_DEFAULT_PRESENCE_PENALTY,
-            # Minimax 专属可选参数（如需可开启）
-            # stop=["\n\n\n"],
+            temperature=chat_entry.temperature,
+            top_p=chat_entry.top_p,
+            max_tokens=chat_entry.max_tokens,
+            stream=False
         )
+        return completion.choices[0].message.content
 
-        # 迭代流式返回的 chunk
-        for chunk in response:
-            # 获取 AI 回复的文本片段
-            content = chunk.choices[0].delta.content
-            if content:
-                # 日志记录流式片段（可选）
-                # logger.debug(f"流式输出片段: {content}")
-                yield content
-
-    # 异常处理（前端友好提示）
-    except APITimeoutError:
-        error_msg = "请求超时，Minimax 服务器响应缓慢"
-        logger.error(error_msg)
-        yield f"[错误] {error_msg}"
-    except APIConnectionError:
-        error_msg = "网络连接失败，请检查网络后重试"
-        logger.error(error_msg)
-        yield f"[错误] {error_msg}"
-    except APIError as e:
-        error_msg = f"Minimax API 错误: {e.message} (code: {e.status_code})"
-        logger.error(error_msg)
-        yield f"[错误] {error_msg}"
     except Exception as e:
-        error_msg = f"未知错误: {str(e)}"
-        logger.error(error_msg)
-        yield f"[错误] {error_msg}"
+        raise Exception(f"千问API调用失败：{str(e)}")
