@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
 # ==============================================
@@ -88,9 +89,12 @@ class ChatEntry(models.Model):
     # 系统提示词（大模型角色设定）
     system_prompt = models.TextField(blank=True, default="你是一个智能助手", verbose_name="系统提示词")
     # 大模型调用参数
-    temperature = models.FloatField(default=0.7, verbose_name="温度参数")
-    top_p = models.FloatField(default=0.9, verbose_name="TopP参数")
-    max_tokens = models.IntegerField(default=2048, verbose_name="最大Token")
+    temperature = models.FloatField(default=0.7, verbose_name="温度参数",
+                                    validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    top_p = models.FloatField(default=0.9, verbose_name="TopP参数",
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    max_tokens = models.IntegerField(default=2048, verbose_name="最大Token",
+                                     validators=[MinValueValidator(1), MaxValueValidator(8192)])
     # 是否为隐私对话
     is_private = models.BooleanField(default=False, verbose_name="是否隐私对话")
     # 创建/更新时间
@@ -141,9 +145,12 @@ class ModelConfig(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="model_configs", blank=True, null=True, verbose_name="所属用户")
     name = models.CharField(max_length=100, verbose_name="配置名称")
     model_name = models.CharField(max_length=50, default="minimax", verbose_name="模型名称")
-    temperature = models.FloatField(default=0.7, verbose_name="温度参数")
-    top_p = models.FloatField(default=0.9, verbose_name="TopP参数")
-    max_tokens = models.IntegerField(default=2048, verbose_name="最大Token")
+    temperature = models.FloatField(default=0.7, verbose_name="温度参数",
+                                    validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    top_p = models.FloatField(default=0.9, verbose_name="TopP参数",
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    max_tokens = models.IntegerField(default=2048, verbose_name="最大Token",
+                                     validators=[MinValueValidator(1), MaxValueValidator(8192)])
     is_global = models.BooleanField(default=False, verbose_name="是否全局配置")
 
     class Meta:

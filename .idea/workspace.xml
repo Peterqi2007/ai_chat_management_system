@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="review models code">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="finish services.py and realize stream ai chat function.">
+      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -23,23 +24,23 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="new" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Peterqi2007"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Peterqi2007&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Peterqi2007/ai_secure_chat.git",
-    "accountId": "1e01038f-091e-4914-a304-d447931c11f5"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Peterqi2007/ai_secure_chat.git&quot;,
+    &quot;accountId&quot;: &quot;1e01038f-091e-4914-a304-d447931c11f5&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -54,7 +55,7 @@
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;new&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;new-qwen&quot;,
     &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
   }
 }</component>
@@ -102,13 +103,22 @@
       <option name="project" value="LOCAL" />
       <updated>1774274560168</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="finish services.py and realize stream ai chat function.">
+      <option name="closed" value="true" />
+      <created>1774511641335</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1774511641335</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="重新找豆包建立models" />
     <MESSAGE value="修改models，填写admin.py,实现模型迁移并验证后台可查看" />
     <MESSAGE value="review models code" />
-    <option name="LAST_COMMIT_MESSAGE" value="review models code" />
+    <MESSAGE value="finish services.py and realize stream ai chat function." />
+    <option name="LAST_COMMIT_MESSAGE" value="finish services.py and realize stream ai chat function." />
   </component>
 </project>
