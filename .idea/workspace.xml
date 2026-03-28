@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="finish services.py and realize stream ai chat function.">
-      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="define all forms" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -111,7 +108,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774511641335</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="define all forms">
+      <option name="closed" value="true" />
+      <created>1774527241345</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1774527241345</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -119,6 +124,7 @@
     <MESSAGE value="修改models，填写admin.py,实现模型迁移并验证后台可查看" />
     <MESSAGE value="review models code" />
     <MESSAGE value="finish services.py and realize stream ai chat function." />
-    <option name="LAST_COMMIT_MESSAGE" value="finish services.py and realize stream ai chat function." />
+    <MESSAGE value="define all forms" />
+    <option name="LAST_COMMIT_MESSAGE" value="define all forms" />
   </component>
 </project>

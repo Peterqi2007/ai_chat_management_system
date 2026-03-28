@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load mezzanine_tags %}
+
+{% block main %}
+{# ====================== 官方原生结构，仅替换内容 ====================== #}
+<div class="jumbotron">
+    <div class="container">
+        {# 替换默认的 Congratulations 为你的文本 #}
+        <h1 class="display-3 text-center">ai-secure-chat</h1>
+        <p class="lead text-center">安全智能对话系统</p>
+        <hr class="my-4">
+
+        {# 未登录 → 显示登录/注册按钮（Mezzanine 原生账号路由） #}
+        {% if not request.user.is_authenticated %}
+        <div class="text-center">
+            <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">登录</a>
+            <a class="btn btn-success btn-lg" href="{% url 'signup' %}" role="button" style="margin-left: 10px;">注册</a>
+        </div>
+        {% endif %}
+
+        {# 已登录 → 显示对话入口 #}
+        {% if request.user.is_authenticated %}
+        <div class="text-center">
+            <a class="btn btn-primary btn-lg" href="/chat/" role="button">进入对话系统</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

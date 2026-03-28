@@ -11,9 +11,9 @@ class UserProfile(models.Model):
     # 一对一关联系统用户，用户删除则资料同步删除
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, verbose_name="所属用户")
     # 隐私对话密码（哈希存储，绝不存明文！）
-    privacy_password_hash = models.CharField(max_length=256, blank=True, default='', verbose_name="隐私密码哈希")
+    privacy_password_hash = models.CharField(max_length=256, blank=True, default='', verbose_name="隐私密码")
     # 默认使用的大模型名称
-    default_model = models.CharField(max_length=50, default="minimax", blank=True, verbose_name="默认大模型")
+    default_model = models.CharField(max_length=50, default="qwen-plus", blank=True, verbose_name="默认大模型")
     # api 密钥
     api_key = models.CharField(max_length=256, default='', verbose_name="api密钥")
     # 创建/更新时间
@@ -144,7 +144,7 @@ class ChatMessage(models.Model):
 class ModelConfig(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="model_configs", blank=True, null=True, verbose_name="所属用户")
     name = models.CharField(max_length=100, verbose_name="配置名称")
-    model_name = models.CharField(max_length=50, default="minimax", verbose_name="模型名称")
+    model_name = models.CharField(max_length=50, default="qwen-plus", verbose_name="模型名称")
     temperature = models.FloatField(default=0.7, verbose_name="温度参数",
                                     validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
     top_p = models.FloatField(default=0.9, verbose_name="TopP参数",

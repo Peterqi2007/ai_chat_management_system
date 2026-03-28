@@ -145,7 +145,7 @@ class UserProfileForm(forms.ModelForm):
         }
         widgets = {
             'default_model': forms.Select(attrs={'class': 'form-select'},
-                                          choices=[('minimax', 'minimax'), ('gpt-3.5-turbo', 'GPT-3.5'),
+                                          choices=[('qwen-plus', '通义千问Plus'), ('gpt-3.5-turbo', 'GPT-3.5'),
                                                    ('gpt-4', 'GPT-4')]),
             'api_key': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入API密钥'}),
         }
@@ -188,7 +188,7 @@ class UserProfileForm(forms.ModelForm):
 # 6. 模型参数配置(ModelConfig)表单
 # 用于管理全局/自定义模型参数模板
 # ==============================================
-"""不知道什么用处"""
+
 class ModelConfigForm(forms.ModelForm):
     class Meta:
         model = ModelConfig
@@ -204,7 +204,7 @@ class ModelConfigForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入配置名称'}),
             'model_name': forms.Select(attrs={'class': 'form-select'},
-                                       choices=[('minimax', 'minimax'), ('gpt-3.5-turbo', 'GPT-3.5'),
+                                       choices=[('qwen-plus', '通义千问Plus'), ('gpt-3.5-turbo', 'GPT-3.5'),
                                                 ('gpt-4', 'GPT-4')]),
             'temperature': forms.NumberInput(attrs={'class': 'form-control', 'min': 0.0, 'max': 1.0, 'step': 0.01}),
             'top_p': forms.NumberInput(attrs={'class': 'form-control', 'min': 0.0, 'max': 1.0, 'step': 0.01}),

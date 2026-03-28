@@ -326,19 +326,6 @@ except ImportError:
 else:
     set_dynamic_settings(globals())
 
-# ===================== 大模型配置 (Minimax) =====================
-# Minimax 接口配置（OpenAI 兼容地址）
-LLM_API_KEY = "你的Minimax API Key"
-LLM_BASE_URL = "https://api.minimax.chat/v1"
-# Minimax 模型名称（官方支持：abab6.5-chat / abab6.5s-chat 等）
-LLM_MODEL = "abab6.5-chat"
-
-# 大模型默认生成参数（可全局调整）
-LLM_DEFAULT_TEMPERATURE = 0.7
-LLM_DEFAULT_MAX_TOKENS = 2048
-LLM_DEFAULT_TOP_P = 0.95
-LLM_DEFAULT_FREQUENCY_PENALTY = 0.1
-LLM_DEFAULT_PRESENCE_PENALTY = 0.1
 
 # 重写用户资料类
 ACCOUNTS_PROFILE_MODEL = "chat.UserProfile"
