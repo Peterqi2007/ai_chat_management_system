@@ -1,7 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
 from django.utils import timezone
+# Mezzanine 关键字字段（官方标准）
+from mezzanine.generic.fields import KeywordsField
+from cryptography.fernet import Fernet
+import hashlib
+import base64
+
+
+# ====================== 加密工具（固定不变，基于项目SECRET_KEY）======================
+def get_fernet_cipher():
+    """生成唯一加密器，用项目SECRET_KEY作为根密钥"""
+    # 把Django的SECRET_KEY处理成Fernet要求的32位密钥
+    key_material = hashlib.sha256(settings.SECRET_KEY.encode()).digest()
+    fernet_key = base64.urlsafe_b64encode(key_material)
+    return Fernet(fernet_key)
 
 # ==============================================
 # 1. 用户扩展资料模型（核心：隐私密码、用户偏好）
@@ -14,8 +29,30 @@ class UserProfile(models.Model):
     privacy_password_hash = models.CharField(max_length=256, blank=True, default='', verbose_name="隐私密码")
     # 默认使用的大模型名称
     default_model = models.CharField(max_length=50, default="qwen-plus", blank=True, verbose_name="默认大模型")
-    # api 密钥
-    api_key = models.CharField(max_length=256, default='', verbose_name="api密钥")
+
+    # ====================== 核心修改：API密钥加密存储 ======================
+    # 数据库仅存储加密后的密文
+    _api_key_encrypted = models.CharField(max_length=512, default='', verbose_name="API密钥密文")
+
+    # 自动加解密的属性，原有代码完全不用改！
+    @property
+    def api_key(self):
+        """读取时自动解密，原有代码直接用 user_profile.api_key 即可拿到明文"""
+        if not self._api_key_encrypted:
+            return ""
+        try:
+            return get_fernet_cipher().decrypt(self._api_key_encrypted.encode()).decode()
+        except Exception:
+            return ""
+
+    @api_key.setter
+    def api_key(self, raw_value):
+        """写入时自动加密，原有表单代码完全不用改"""
+        if not raw_value:
+            self._api_key_encrypted = ""
+            return
+        self._api_key_encrypted = get_fernet_cipher().encrypt(raw_value.encode()).decode()
+
     # 创建/更新时间
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
@@ -97,6 +134,8 @@ class ChatEntry(models.Model):
                                      validators=[MinValueValidator(1), MaxValueValidator(8192)])
     # 是否为隐私对话
     is_private = models.BooleanField(default=False, verbose_name="是否隐私对话")
+    # ✅【新增】Mezzanine 官方关键字/标签字段（逗号分隔，自动管理）
+    keywords = KeywordsField(verbose_name="对话关键字", blank=True)
     # 创建/更新时间
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")

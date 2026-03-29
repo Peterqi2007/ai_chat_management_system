@@ -1,9 +1,12 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import (
     Category, Folder, ChatEntry, UserProfile, ModelConfig
 )
-
+# 导入 Mezzanine 原生的 ProfileForm
+from mezzanine.accounts.forms import ProfileForm as MezzanineProfileForm
+from mezzanine.accounts import ProfileNotConfigured
+from mezzanine.conf import settings
 import bcrypt
 import hashlib
 
@@ -69,7 +72,7 @@ class FolderForm(forms.ModelForm):
 class ChatEntryForm(forms.ModelForm):
     class Meta:
         model = ChatEntry
-        fields = ['title', 'temperature', 'top_p', 'max_tokens', 'is_private', 'folder']
+        fields = ['title', 'temperature', 'top_p', 'max_tokens', 'is_private', 'folder', 'keywords']
         labels = {
             'title': ChatEntry._meta.get_field('title').verbose_name,
             'temperature': ChatEntry._meta.get_field('temperature').verbose_name,
@@ -77,6 +80,7 @@ class ChatEntryForm(forms.ModelForm):
             'max_tokens': ChatEntry._meta.get_field('max_tokens').verbose_name,
             'is_private': ChatEntry._meta.get_field('is_private').verbose_name,
             'folder': ChatEntry._meta.get_field('folder').verbose_name,
+            'keywords': ChatEntry._meta.get_field('keywords').verbose_name,
         }
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入对话标题'}),
@@ -85,6 +89,8 @@ class ChatEntryForm(forms.ModelForm):
             'max_tokens': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 8192}),
             'is_private': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'folder': forms.Select(attrs={'class': 'form-select'}),
+            # ✅ 关键字输入框：逗号分隔多个关键字，适配Bootstrap样式
+            'keywords': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '多个关键字用英文逗号分隔（如：AI,对话,安全）'}),
         }
 
 
@@ -113,76 +119,94 @@ class PrivacyPasswordVerifyForm(forms.Form):
         }
     )
 
-
 # ==============================================
 # 5. 用户资料(UserProfile)表单
 # 用于管理用户扩展资料，包含隐私密码设置（自动哈希存储）
 # ==============================================
-class UserProfileForm(forms.ModelForm):
-    # 新增明文隐私密码字段（模型中存储哈希，表单中输入明文）
+
+User = get_user_model()
+
+
+class UserProfileForm(MezzanineProfileForm):
+    """
+    终极兼容版：
+    1. 保留原生【登录密码】修改功能（password1/password2）
+    2. 新增独立【隐私对话密码】功能（privacy_password/privacy_password_confirm）
+    3. 无重复字段，无BUG，不影响登录
+    """
+    # ====================== 独立隐私密码字段（和原生登录密码完全区分） ======================
     privacy_password = forms.CharField(
-        label="隐私密码",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '设置隐私对话密码（不少于6位）'}),
+        label="隐私对话密码",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': '设置隐私对话密码（仅用于解锁隐私对话）'
+        }),
         required=False,
-        min_length=6,
-        error_messages={
-            'min_length': '密码长度不能少于6位'
-        }
+        min_length=6
     )
-    # 确认隐私密码（用于设置时验证）
     privacy_password_confirm = forms.CharField(
-        label="确认隐私密码",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '再次输入隐私密码'}),
+        label="确认隐私对话密码",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=False
     )
 
     class Meta:
-        model = UserProfile
-        fields = ['default_model', 'api_key']
-        labels = {
-            'default_model': UserProfile._meta.get_field('default_model').verbose_name,
-            'api_key': UserProfile._meta.get_field('api_key').verbose_name,
-        }
-        widgets = {
-            'default_model': forms.Select(attrs={'class': 'form-select'},
-                                          choices=[('qwen-plus', '通义千问Plus'), ('gpt-3.5-turbo', 'GPT-3.5'),
-                                                   ('gpt-4', 'GPT-4')]),
-            'api_key': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入API密钥'}),
-        }
+        model = User
+        # 保留原生所有字段：包含登录密码修改字段
+        fields = ("username", "email", "first_name", "last_name")
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # 加载用户私有配置
+        self.profile = None
+        if self.instance and self.instance.pk:
+            self.profile, _ = UserProfile.objects.get_or_create(user=self.instance)
+
+        # 添加你的业务字段
+        self.fields["default_model"] = forms.ChoiceField(
+            label="默认大模型",
+            choices=[('qwen-plus', '通义千问Plus'), ('gpt-3.5-turbo', 'GPT-3.5'), ('gpt-4', 'GPT-4')],
+            initial=self.profile.default_model if self.profile else "qwen-plus",
+            widget=forms.Select(attrs={'class': 'form-select'})
+        )
+        self.fields["api_key"] = forms.CharField(
+            label="API密钥",
+            initial=self.profile.api_key if self.profile else "",
+            widget=forms.TextInput(attrs={'class': 'form-control'})
+        )
+
+    # 仅验证隐私密码，不干扰原生登录密码
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get('privacy_password')
-        password_confirm = cleaned_data.get('privacy_password_confirm')
-
-        # 如果输入了密码但两次不一致，抛出错误
-        if password or password_confirm:
-            if password != password_confirm:
-                self.add_error('privacy_password_confirm', '两次输入的密码不一致')
-
+        # 只校验你的隐私密码，原生密码由Mezzanine自动校验
+        pwd = cleaned_data.get("privacy_password")
+        pwd2 = cleaned_data.get("privacy_password_confirm")
+        if pwd and pwd != pwd2:
+            self.add_error("privacy_password_confirm", "两次输入的隐私密码不一致")
         return cleaned_data
 
+    # 同时保存：原生User + 你的UserProfile
     def save(self, commit=True):
-        instance = super().save(commit=False)
-        # 如果输入了新密码，生成哈希并存储
-        password = self.cleaned_data.get('privacy_password')
-        if password:
-            try:
-                # bcrypt 哈希加密
-                instance.privacy_password_hash = bcrypt.hashpw(
-                    password.encode('utf-8'),
-                    bcrypt.gensalt()
-                ).decode('utf-8')
+        # 保存原生用户数据（含登录密码）
+        user = super().save(commit=commit)
 
+        # 保存你的隐私配置
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.default_model = self.cleaned_data.get("default_model")
+        profile.api_key = self.cleaned_data.get("api_key", "")
+
+        # 加密保存隐私对话密码
+        pwd = self.cleaned_data.get("privacy_password")
+        if pwd:
+            try:
+                profile.privacy_password_hash = bcrypt.hashpw(pwd.encode(), bcrypt.gensalt()).decode()
             except:
-                print("bcrypt哈希加密失败") # 上服务器的时候把这句删了
-                # 使用sha256哈希（可根据需求替换为更安全的方式，如bcrypt）
-                instance.privacy_password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+                profile.privacy_password_hash = hashlib.sha256(pwd.encode()).hexdigest()
 
         if commit:
-            instance.save()
-        return instance
-
+            profile.save()
+        return user
 
 # ==============================================
 # 6. 模型参数配置(ModelConfig)表单

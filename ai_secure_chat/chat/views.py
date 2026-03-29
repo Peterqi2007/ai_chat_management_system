@@ -6,7 +6,7 @@ from django.urls import reverse
 from .models import Category, Folder, ChatEntry, UserProfile,ChatMessage
 from .forms import (
     CategoryForm, FolderForm, ChatEntryForm,
-    PrivacyPasswordVerifyForm, UserProfileForm
+    PrivacyPasswordVerifyForm, #UserProfileForm
 )
 # 保留你已有的流式对话视图
 from django.http import StreamingHttpResponse
@@ -282,7 +282,7 @@ def chat_detail(request, chat_id):
         'chat_entry': chat_entry,
         'messages': messages
     })
-
+'''
 @login_required
 def profile_edit(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
@@ -296,6 +296,6 @@ def profile_edit(request):
         form = UserProfileForm(instance=profile)
     return render(request, 'chat/profile_edit.html', {'form': form, 'title': '个人资料'})
 
-
+'''
 
 

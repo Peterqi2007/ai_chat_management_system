@@ -329,3 +329,8 @@ else:
 
 # 重写用户资料类
 ACCOUNTS_PROFILE_MODEL = "chat.UserProfile"
+
+# 保护用户个人资料，千万不能关
+ACCOUNTS_PROFILE_VIEWS_ENABLED = False
+ACCOUNTS_PROFILE_FORM_CLASS = "chat.forms.UserProfileForm"
+ACCOUNTS_PROFILE_FORM_EXCLUDE_FIELDS = ("privacy_password_hash","_api_key_encrypted",)
