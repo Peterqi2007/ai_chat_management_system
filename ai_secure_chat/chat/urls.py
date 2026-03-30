@@ -1,32 +1,35 @@
 from django.urls import path
 from . import views
 
+app_name = 'chat'  # 命名空间，与模板中{% url 'chat:xxx' %}对应
+
 urlpatterns = [
-    # ===================== 分类路由 =====================
+    # ===================== 流式对话接口 =====================
+    path('chat/<int:chat_id>/stream/', views.chat_stream, name='chat_stream'),
+
+    # ===================== 分类管理 =====================
     path('categories/', views.category_list, name='category_list'),
-    path('categories/create/', views.category_create, name='category_create'),
-    path('categories/update/<int:pk>/', views.category_update, name='category_update'),
-    path('categories/delete/<int:pk>/', views.category_delete, name='category_delete'),
+    path('category/create/', views.category_create, name='category_create'),
+    path('category/<int:pk>/update/', views.category_update, name='category_update'),
+    path('category/<int:pk>/delete/', views.category_delete, name='category_delete'),
 
-    # ===================== 文件夹路由（支持按分类筛选） =====================
+    # ===================== 文件夹管理 =====================
     path('folders/', views.folder_list, name='folder_list'),
-    path('folders/category/<int:category_id>/', views.folder_list, name='folder_list_by_category'),
-    path('folders/create/', views.folder_create, name='folder_create'),
-    path('folders/update/<int:pk>/', views.folder_update, name='folder_update'),
-    path('folders/delete/<int:pk>/', views.folder_delete, name='folder_delete'),
+    path('folders/category/<int:category_id>/', views.folder_list, name='folder_list'),  # 按分类筛选文件夹
+    path('folder/create/', views.folder_create, name='folder_create'),
+    path('folder/<int:pk>/update/', views.folder_update, name='folder_update'),
+    path('folder/<int:pk>/delete/', views.folder_delete, name='folder_delete'),
 
-    # ===================== 对话路由（支持按文件夹筛选） =====================
-    path('chats/', views.chat_entry_list, name='chat_entry_list'),
-    path('chats/folder/<int:folder_id>/', views.chat_entry_list, name='chat_entry_list_by_folder'),
-    path('chats/create/', views.chat_entry_create, name='chat_entry_create'),
-    path('chats/update/<int:pk>/', views.chat_entry_update, name='chat_entry_update'),
-    path('chats/delete/<int:pk>/', views.chat_entry_delete, name='chat_entry_delete'),
+    # ===================== 对话条目管理 =====================
+    path('chat-entries/', views.chat_entry_list, name='chat_entry_list'),
+    path('chat-entries/folder/<int:folder_id>/', views.chat_entry_list, name='chat_entry_list'),  # 按文件夹筛选对话
+    path('chat/create/', views.chat_entry_create, name='chat_entry_create'),
+    path('chat/<int:pk>/update/', views.chat_entry_update, name='chat_entry_update'),
+    path('chat/<int:pk>/delete/', views.chat_entry_delete, name='chat_entry_delete'),
 
-    # ===================== 核心对话功能 =====================
-    path('chat/<int:chat_id>/', views.chat_detail, name='chat_detail'),
-    path('chat/verify/<int:chat_id>/', views.private_chat_verify, name='private_chat_verify'),
-    path('api/chat-stream/<int:chat_id>/', views.chat_stream, name='chat_stream'),
-
-    # ===================== 用户资料 =====================
-    path('profile/edit/', views.profile_edit, name='profile_edit'),
+    # ===================== 隐私验证 + 对话详情 =====================
+    path('chat/<int:chat_id>/verify-privacy/', views.chat_verify_privacy, name='chat_verify_privacy'),
+    path('chat/<int:chat_id>/info/', views.chat_entry_info, name='chat_entry_info'),  # 对话信息页（触发隐私验证）
+    path('chat/<int:chat_id>/private-verify/', views.private_chat_verify, name='private_chat_verify'),  # 旧版隐私验证（兜底）
+    path('chat/<int:chat_id>/detail/', views.chat_detail, name='chat_detail'),  # 对话详情页（需从info页跳转）
 ]

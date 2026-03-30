@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+{% block main %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <!-- 卡片头部 -->
+                <div class="card-header bg-primary bg-gradient text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">{{ page_title }}</h4>
+                    {% if is_private %}
+                        <span class="badge bg-danger">🔒 隐私对话</span>
+                    {% else %}
+                        <span class="badge bg-success">普通对话</span>
+                    {% endif %}
+                </div>
+
+                <!-- 卡片主体：全字段信息展示 -->
+                <div class="card-body">
+                    <!-- 基础信息 -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">基础信息</h5>
+                        <hr>
+                        <p><strong>对话标题：</strong>{{ title }}</p>
+                        <p><strong>对话简介：</strong>{{ description|default:"暂无简介" }}</p>
+                        <p><strong>所属文件夹：</strong>
+                            {% if folder %}
+                                <span class="badge bg-info">{{ folder.name }}</span>
+                            {% else %}
+                                <span class="text-muted">未分类</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- 关键字 -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">对话关键字</h5>
+                        <hr>
+                        {% for kw in keywords %}
+                            <span class="badge bg-secondary me-1 mb-1">{{ kw }}</span>
+                        {% empty %}
+                            <span class="text-muted">未设置关键字</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- 模型配置 -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">AI模型配置</h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-4"><strong>温度(Temperature)：</strong> {{ temperature }}</div>
+                            <div class="col-md-4"><strong>Top P：</strong> {{ top_p }}</div>
+                            <div class="col-md-4"><strong>最大Token：</strong> {{ max_tokens }}</div>
+                        </div>
+                    </div>
+
+                    <!-- 时间信息 -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">时间信息</h5>
+                        <hr>
+                        <p><strong>创建时间：</strong>{{ created_at|date:"Y-m-d H:i:s" }}</p>
+                        <p><strong>更新时间：</strong>{{ updated_at|date:"Y-m-d H:i:s" }}</p>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                        <a href="{% url 'chat_detail' chat_entry.id %}" class="btn btn-primary">
+                            🚪 进入对话
+                        </a>
+                        <a href="{% url 'chat_entry_update' chat_entry.id %}" class="btn btn-warning">
+                            ✏️ 修改信息
+                        </a>
+                        <a href="{% url 'chat_entry_delete' chat_entry.id %}" class="btn btn-danger"
+                           onclick="return confirm('确定删除该对话？此操作不可恢复！')">
+                            🗑️ 删除对话
+                        </a>
+                        <a href="{% url 'chat_entry_list' %}" class="btn btn-secondary">
+                            ← 返回列表
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

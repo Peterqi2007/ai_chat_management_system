@@ -211,6 +211,74 @@ def chat_entry_list(request, folder_id=None):
         'folder': folder
     })
 
+@login_required
+def chat_verify_privacy(request, chat_id):
+    """独立的隐私密码验证页面，强制重定向访问"""
+    chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
+    profile = get_object_or_404(UserProfile, user=request.user)
+    session_key = f'private_chat_verified_{chat_id}'
+
+    # 已验证直接返回信息页
+    if request.session.get(session_key):
+        return redirect('chat_entry_info', chat_id=chat_id)
+
+    if request.method == 'POST':
+        form = PrivacyPasswordVerifyForm(request.POST)
+        if form.is_valid():
+            pwd = form.cleaned_data['privacy_password']
+            # 验证密码（你模型中的哈希验证方法）
+            if profile.check_privacy_password(pwd):
+                request.session[session_key] = True
+                # 验证通过 → 跳回对话信息页
+                return redirect('chat_entry_info', chat_id=chat_id)
+            form.add_error('privacy_password', '密码错误，请重试！')
+    else:
+        form = PrivacyPasswordVerifyForm()
+
+    return render(request, 'chat/private_verify.html', {
+        'form': form,
+        'chat_entry': chat_entry
+    })
+
+# ====================== 修正：对话信息页（隐私校验=重定向到验证URL）======================
+@login_required
+def chat_entry_info(request, chat_id):
+    chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
+    session_key = f'private_chat_verified_{chat_id}'
+
+    # ✅ 核心修正：隐私对话 + 未验证 → 强制重定向到独立验证URL
+    if chat_entry.is_private and not request.session.get(session_key, False):
+        return redirect('chat_verify_privacy', chat_id=chat_id)
+
+    # 标记：从info页准备进入对话（用于chat_detail权限校验）
+    request.session[f'from_info_{chat_id}'] = True
+
+    context = {
+        # 核心对象
+        'chat_entry': chat_entry,
+        # 关键字（Mezzanine格式）
+        'keywords': chat_entry.keywords.keywords,
+        # 关联文件夹
+        'folder': chat_entry.folder,
+        # 基础信息
+        'title': chat_entry.title,
+        'description': chat_entry.description,
+        'is_private': chat_entry.is_private,
+        # 模型参数
+        'temperature': chat_entry.temperature,
+        'top_p': chat_entry.top_p,
+        'max_tokens': chat_entry.max_tokens,
+        # 时间信息（格式化）
+        'created_at': chat_entry.created_at,
+        'updated_at': chat_entry.updated_at,
+        # 页面配置
+        'page_title': f"对话详情 - {chat_entry.title}",
+
+    }
+
+    return render(request, 'chat/chat_entry_info.html', context)
+
+
 # ==============================================
 # 6. 对话条目增删改查（无修改，保留原有）
 # ==============================================
@@ -274,13 +342,26 @@ def private_chat_verify(request, chat_id):
 @login_required
 def chat_detail(request, chat_id):
     chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
-    if chat_entry.is_private:
-        if not request.session.get(f'private_chat_{chat_id}', False):
-            return redirect('private_chat_verify', chat_id=chat_id)
-    messages = chat_entry.messages.all().order_by('created_at')
+
+    # ✅ 核心限制：仅允许从 chat_entry_info 跳转进入，禁止直接输URL访问
+    if not request.session.get(f'from_info_{chat_id}', False):
+        messages.error(request, "禁止直接访问！请从对话详情页进入")
+        return redirect('chat_entry_info', chat_id=chat_id)
+
+    # 隐私对话二次校验（兜底）
+    if chat_entry.is_private and not request.session.get(f'private_chat_verified_{chat_id}', False):
+        return redirect('chat_verify_privacy', chat_id=chat_id)
+
+    # 清理临时标记（防止重复使用）
+    del request.session[f'from_info_{chat_id}']
+
+    #if chat_entry.is_private:
+        #if not request.session.get(f'private_chat_{chat_id}', False):
+            #return redirect('private_chat_verify', chat_id=chat_id)
+    chat_messages = chat_entry.messages.all().order_by('created_at')
     return render(request, 'chat/chat_detail.html', {
         'chat_entry': chat_entry,
-        'messages': messages
+        'messages': chat_messages
     })
 '''
 @login_required

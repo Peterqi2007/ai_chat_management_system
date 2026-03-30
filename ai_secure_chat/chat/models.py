@@ -57,6 +57,10 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
 
+    # 密码验证方法
+    def check_privacy_password(self, raw_password):
+        return self.privacy_password_hash == hashlib.sha256(raw_password.encode()).hexdigest()
+
     class Meta:
         verbose_name = "用户资料"
         verbose_name_plural = "用户资料"
@@ -123,6 +127,8 @@ class ChatEntry(models.Model):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name="chat_entries", verbose_name="所属文件夹")
     # 对话标题
     title = models.CharField(max_length=200, verbose_name="对话标题")
+    # ✅ 新增：用户描述/简介字段（核心需求1）
+    description = models.CharField(max_length=255, blank=True, default="", verbose_name="对话简介")
     # 系统提示词（大模型角色设定）
     system_prompt = models.TextField(blank=True, default="你是一个智能助手", verbose_name="系统提示词")
     # 大模型调用参数

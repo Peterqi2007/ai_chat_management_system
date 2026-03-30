@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="complete views and urls, ready for frontend programming">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="为聊天入口添加了标签便于分类，修复了隐私密码和api密钥明文存储的安全漏洞">
+      <change afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -55,16 +56,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "password1",
-    "last_opened_file_path": "E:/ai_secure_chat"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;password1&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\ai_secure_chat" />
@@ -133,7 +134,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774703556645</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="为聊天入口添加了标签便于分类，修复了隐私密码和api密钥明文存储的安全漏洞">
+      <option name="closed" value="true" />
+      <created>1774764436636</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1774764436637</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -143,6 +152,7 @@
     <MESSAGE value="finish services.py and realize stream ai chat function." />
     <MESSAGE value="define all forms" />
     <MESSAGE value="complete views and urls, ready for frontend programming" />
-    <option name="LAST_COMMIT_MESSAGE" value="complete views and urls, ready for frontend programming" />
+    <MESSAGE value="为聊天入口添加了标签便于分类，修复了隐私密码和api密钥明文存储的安全漏洞" />
+    <option name="LAST_COMMIT_MESSAGE" value="为聊天入口添加了标签便于分类，修复了隐私密码和api密钥明文存储的安全漏洞" />
   </component>
 </project>

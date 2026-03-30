@@ -72,9 +72,10 @@ class FolderForm(forms.ModelForm):
 class ChatEntryForm(forms.ModelForm):
     class Meta:
         model = ChatEntry
-        fields = ['title', 'temperature', 'top_p', 'max_tokens', 'is_private', 'folder', 'keywords']
+        fields = ['title', 'description', 'temperature', 'top_p', 'max_tokens', 'is_private', 'folder', 'keywords']
         labels = {
             'title': ChatEntry._meta.get_field('title').verbose_name,
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '输入对话简介（可选）'}),
             'temperature': ChatEntry._meta.get_field('temperature').verbose_name,
             'top_p': ChatEntry._meta.get_field('top_p').verbose_name,
             'max_tokens': ChatEntry._meta.get_field('max_tokens').verbose_name,
@@ -199,11 +200,7 @@ class UserProfileForm(MezzanineProfileForm):
         # 加密保存隐私对话密码
         pwd = self.cleaned_data.get("privacy_password")
         if pwd:
-            try:
-                profile.privacy_password_hash = bcrypt.hashpw(pwd.encode(), bcrypt.gensalt()).decode()
-            except:
-                profile.privacy_password_hash = hashlib.sha256(pwd.encode()).hexdigest()
-
+                profile.privacy_password_hash = bcrypt.hashpw(pwd.encode(), bcrypt.gensalt()).decode() # 哈希加密
         if commit:
             profile.save()
         return user
