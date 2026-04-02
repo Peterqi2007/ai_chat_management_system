@@ -75,7 +75,7 @@ class ChatEntryForm(forms.ModelForm):
         fields = ['title', 'description', 'temperature', 'top_p', 'max_tokens', 'is_private', 'folder', 'keywords']
         labels = {
             'title': ChatEntry._meta.get_field('title').verbose_name,
-            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '输入对话简介（可选）'}),
+            'description': ChatEntry._meta.get_field('description').verbose_name,
             'temperature': ChatEntry._meta.get_field('temperature').verbose_name,
             'top_p': ChatEntry._meta.get_field('top_p').verbose_name,
             'max_tokens': ChatEntry._meta.get_field('max_tokens').verbose_name,
@@ -85,8 +85,9 @@ class ChatEntryForm(forms.ModelForm):
         }
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入对话标题'}),
+            'description': forms.Textarea(attrs={'class': 'form-control','rows': 3,'placeholder': '输入对话描述（可选）'}),
             'temperature': forms.NumberInput(attrs={'class': 'form-control', 'min': 0.0, 'max': 1.0, 'step': 0.01}),
-            'top_p': forms.NumberInput(attrs={'class': 'form-control', 'min': 0.0, 'max': 1.0, 'step': 0.01}), #无法理解的键
+            'top_p': forms.NumberInput(attrs={'class': 'form-control', 'min': 0.0, 'max': 1.0, 'step': 0.01}),
             'max_tokens': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 8192}),
             'is_private': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'folder': forms.Select(attrs={'class': 'form-select'}),

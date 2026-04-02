@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
-{% block main %}
+{% load keyword_tags %}  {# ✅ 必须导入 Mezzanine 关键字模板标签 #}
+{% block title %}{{ chat_entry.title }}{% endblock %}
+
+{% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -32,16 +35,17 @@
                         </p>
                     </div>
 
-                    <!-- 关键字 -->
-                    <div class="mb-4">
-                        <h5 class="text-primary">对话关键字</h5>
-                        <hr>
-                        {% for kw in keywords %}
-                            <span class="badge bg-secondary me-1 mb-1">{{ kw }}</span>
-                        {% empty %}
-                            <span class="text-muted">未设置关键字</span>
-                        {% endfor %}
-                    </div>
+                   <!-- ✅ 修复：Mezzanine KeywordsField 正确访问方式 -->
+                     <div class="mt-3">
+                        <strong>对话关键字：</strong>
+                        {% if keywords %}
+                            {% for keyword in keywords %}
+                                <span class="badge bg-primary me-2">{{ keyword.keyword }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">暂无关键字</span>
+                        {% endif %}
+                     </div>
 
                     <!-- 模型配置 -->
                     <div class="mb-4">
@@ -50,7 +54,7 @@
                         <div class="row">
                             <div class="col-md-4"><strong>温度(Temperature)：</strong> {{ temperature }}</div>
                             <div class="col-md-4"><strong>Top P：</strong> {{ top_p }}</div>
-                            <div class="col-md-4"><strong>最大Token：</strong> {{ max_tokens }}</div>
+                            <div class="col-md-4"><strong>最大Token(词元数)：</strong> {{ max_tokens }}</div>
                         </div>
                     </div>
 

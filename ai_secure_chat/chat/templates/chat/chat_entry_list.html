@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}关键字「{{ current_keyword }}」的对话{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h2>关键字「{{ current_keyword }}」的对话</h2>
+    {% if entries %}
+        <ul class="list-group mt-3">
+            {% for entry in entries %}
+                <li class="list-group-item">
+                    <a href="{% url 'chat:chat_entry_info' entry.id %}">{{ entry.title }}</a>
+                    <span class="text-muted ms-2">{{ entry.created_at|date:"Y-m-d" }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info mt-3">暂无匹配的对话</div>
+    {% endif %}
+    <a href="{% url 'chat:folder_list' %}" class="btn btn-secondary mt-3">返回文件夹</a>
+</div>
+{% endblock %}

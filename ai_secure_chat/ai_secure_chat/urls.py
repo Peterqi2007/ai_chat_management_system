@@ -19,6 +19,7 @@ urlpatterns = i18n_patterns(
     # Change the admin prefix here to use an alternate URL for the
     # admin interface, which would be marginally more secure.
     path("admin/", include(admin.site.urls)),
+    path('',include('chat.urls')),
 )
 
 if settings.USE_MODELTRANSLATION:

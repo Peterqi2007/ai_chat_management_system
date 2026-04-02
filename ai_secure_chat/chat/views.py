@@ -98,7 +98,7 @@ def category_create(request):
             category.user = request.user
             category.save()
             messages.success(request, '分类创建成功！')
-            return redirect('category_list')
+            return redirect('chat:category_list')
     else:
         form = CategoryForm()
     return render(request, 'chat/category_form.html', {'form': form, 'title': '创建分类'})
@@ -111,7 +111,7 @@ def category_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, '分类更新成功！')
-            return redirect('category_list')
+            return redirect('chat:category_list')
     else:
         form = CategoryForm(instance=category)
     return render(request, 'chat/category_form.html', {'form': form, 'title': '编辑分类'})
@@ -121,7 +121,7 @@ def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk, user=request.user)
     category.delete()
     messages.success(request, '分类删除成功！')
-    return redirect('category_list')
+    return redirect('chat:category_list')
 
 # ==============================================
 # 3. 文件夹列表视图 ✅【Claude优化版：分类过滤+子文件夹+对话】
@@ -129,6 +129,7 @@ def category_delete(request, pk):
 @login_required
 def folder_list(request, category_id=None):
     """文件夹列表 - 支持按分类过滤，显示子文件夹和对话条目"""
+
     if category_id:
         # 按分类筛选文件夹
         folders = Folder.objects.filter(
@@ -161,7 +162,7 @@ def folder_create(request):
             folder.user = request.user
             folder.save()
             messages.success(request, '文件夹创建成功！')
-            return redirect('folder_list')
+            return redirect('chat:folder_list')
     else:
         form = FolderForm(user=request.user)
     return render(request, 'chat/folder_form.html', {'form': form, 'title': '创建文件夹'})
@@ -174,7 +175,7 @@ def folder_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, '文件夹更新成功！')
-            return redirect('folder_list')
+            return redirect('chat:folder_list')
     else:
         form = FolderForm(user=request.user, instance=folder)
     return render(request, 'chat/folder_form.html', {'form': form, 'title': '编辑文件夹'})
@@ -184,7 +185,7 @@ def folder_delete(request, pk):
     folder = get_object_or_404(Folder, pk=pk, user=request.user)
     folder.delete()
     messages.success(request, '文件夹删除成功！')
-    return redirect('folder_list')
+    return redirect('chat:folder_list')
 
 # ==============================================
 # 5. 对话条目列表视图 ✅【Claude优化版：按文件夹过滤+上下文】
@@ -220,7 +221,7 @@ def chat_verify_privacy(request, chat_id):
 
     # 已验证直接返回信息页
     if request.session.get(session_key):
-        return redirect('chat_entry_info', chat_id=chat_id)
+        return redirect('chat:chat_entry_info', chat_id=chat_id)
 
     if request.method == 'POST':
         form = PrivacyPasswordVerifyForm(request.POST)
@@ -230,7 +231,7 @@ def chat_verify_privacy(request, chat_id):
             if profile.check_privacy_password(pwd):
                 request.session[session_key] = True
                 # 验证通过 → 跳回对话信息页
-                return redirect('chat_entry_info', chat_id=chat_id)
+                return redirect('chat:chat_entry_info', chat_id=chat_id)
             form.add_error('privacy_password', '密码错误，请重试！')
     else:
         form = PrivacyPasswordVerifyForm()
@@ -248,16 +249,16 @@ def chat_entry_info(request, chat_id):
 
     # ✅ 核心修正：隐私对话 + 未验证 → 强制重定向到独立验证URL
     if chat_entry.is_private and not request.session.get(session_key, False):
-        return redirect('chat_verify_privacy', chat_id=chat_id)
+        return redirect('chat:chat_verify_privacy', chat_id=chat_id)
 
     # 标记：从info页准备进入对话（用于chat_detail权限校验）
     request.session[f'from_info_{chat_id}'] = True
-
+    '''
     context = {
         # 核心对象
         'chat_entry': chat_entry,
         # 关键字（Mezzanine格式）
-        'keywords': chat_entry.keywords.keywords,
+        'keywords': chat_entry.keywords.all(),
         # 关联文件夹
         'folder': chat_entry.folder,
         # 基础信息
@@ -270,11 +271,19 @@ def chat_entry_info(request, chat_id):
         'max_tokens': chat_entry.max_tokens,
         # 时间信息（格式化）
         'created_at': chat_entry.created_at,
-        'updated_at': chat_entry.updated_at,
+        'updated_at': chat_entry.updated_at, #if hasattr(chat_entry, 'updated_at') else None, # 避免updated_at属性不存在导致的报错
         # 页面配置
         'page_title': f"对话详情 - {chat_entry.title}",
-
+        }
+    '''
+    # ✅ 修复：简化context，只传递核心对象（模板直接通过chat_entry访问字段，避免冲突）
+    context = {
+        'chat_entry': chat_entry,
+        'page_title': f"对话详情 - {chat_entry.title}",
+        # 可选：提前处理关键字（避免模板中出错）
+        'keywords': chat_entry.keywords.all(),
     }
+
 
     return render(request, 'chat/chat_entry_info.html', context)
 
@@ -291,8 +300,9 @@ def chat_entry_create(request):
             chat_entry.user = request.user
             chat_entry.system_prompt = "你是一个智能助手"
             chat_entry.save()
+            # chat_entry.keywords.refresh_from_db()
             messages.success(request, '对话创建成功！')
-            return redirect('chat_detail', chat_id=chat_entry.id)
+            return redirect('chat:folder_list_by_folder', folder_id=chat_entry.folder.id)
     else:
         form = ChatEntryForm(user=request.user)
     return render(request, 'chat/chat_entry_form.html', {'form': form, 'title': '创建对话'})
@@ -305,7 +315,7 @@ def chat_entry_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, '对话更新成功！')
-            return redirect('chat_entry_list')
+            return redirect('chat:chat_entry_list')
     else:
         form = ChatEntryForm(user=request.user, instance=chat_entry)
     return render(request, 'chat/chat_entry_form.html', {'form': form, 'title': '编辑对话'})
@@ -315,7 +325,7 @@ def chat_entry_delete(request, pk):
     chat_entry = get_object_or_404(ChatEntry, pk=pk, user=request.user)
     chat_entry.delete()
     messages.success(request, '对话删除成功！')
-    return redirect('chat_entry_list')
+    return redirect('chat:chat_entry_list')
 
 # ==============================================
 # 7. 隐私对话验证、对话详情、用户资料、流式对话（无修改，保留原有）
@@ -332,7 +342,7 @@ def private_chat_verify(request, chat_id):
             pwd_hash = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
             if pwd_hash == profile.privacy_password_hash:
                 request.session[f'private_chat_{chat_id}'] = True
-                return redirect('chat_detail', chat_id=chat_id)
+                return redirect('chat:chat_detail', chat_id=chat_id)
             else:
                 form.add_error('privacy_password', '密码错误，请重试！')
     else:
@@ -346,11 +356,11 @@ def chat_detail(request, chat_id):
     # ✅ 核心限制：仅允许从 chat_entry_info 跳转进入，禁止直接输URL访问
     if not request.session.get(f'from_info_{chat_id}', False):
         messages.error(request, "禁止直接访问！请从对话详情页进入")
-        return redirect('chat_entry_info', chat_id=chat_id)
+        return redirect('chat:chat_entry_info', chat_id=chat_id)
 
     # 隐私对话二次校验（兜底）
     if chat_entry.is_private and not request.session.get(f'private_chat_verified_{chat_id}', False):
-        return redirect('chat_verify_privacy', chat_id=chat_id)
+        return redirect('chat:chat_verify_privacy', chat_id=chat_id)
 
     # 清理临时标记（防止重复使用）
     del request.session[f'from_info_{chat_id}']
@@ -363,6 +373,19 @@ def chat_detail(request, chat_id):
         'chat_entry': chat_entry,
         'messages': chat_messages
     })
+
+@login_required
+def entries_by_keyword(request, slug):
+    """按关键字筛选当前用户的对话"""
+    entries = ChatEntry.objects.filter(
+        user=request.user,
+        keywords__keyword__slug=slug  # 官方推荐的关键字查询方式
+    )
+    return render(request, 'chat/chat_entry_list.html', {
+        'entries': entries,
+        'current_keyword': slug
+    })
+
 '''
 @login_required
 def profile_edit(request):

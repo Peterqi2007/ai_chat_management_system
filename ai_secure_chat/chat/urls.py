@@ -32,4 +32,7 @@ urlpatterns = [
     path('chat/<int:chat_id>/info/', views.chat_entry_info, name='chat_entry_info'),  # 对话信息页（触发隐私验证）
     path('chat/<int:chat_id>/private-verify/', views.private_chat_verify, name='private_chat_verify'),  # 旧版隐私验证（兜底）
     path('chat/<int:chat_id>/detail/', views.chat_detail, name='chat_detail'),  # 对话详情页（需从info页跳转）
+
+    # ===================== 按关键词筛选对话 =====================
+    path('entries/keyword/<slug:slug>/', views.entries_by_keyword, name='entries_by_keyword'),
 ]

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}分类管理{% endblock %}
+{% block main %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="text-primary fw-bold"><i class="fas fa-layer-group icon-placeholder"></i>分类管理</h3>
+                <a href="{% url 'chat:category_create' %}" class="btn btn-primary">+ 新建分类</a>
+            </div>
+            {% for category in categories %}
+            <div class="card mb-3 p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1 fw-bold">{{ category.name }}</h5>
+                        <p class="text-muted small mb-0">{{ category.description|default:"暂无描述" }}</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'chat:folder_list' category.id %}" class="btn btn-sm btn-primary">查看文件夹</a>
+                        <a href="{% url 'chat:category_update' category.id %}" class="btn btn-sm btn-warning mx-1">编辑</a>
+                        <a href="{% url 'chat:category_delete' category.id %}" class="btn btn-sm btn-danger">删除</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card p-4 text-center text-muted">暂无分类，请创建</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
