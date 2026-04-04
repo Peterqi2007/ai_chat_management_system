@@ -350,8 +350,8 @@ def chat_detail(request, chat_id):
         return redirect('chat:chat_entry_info', chat_id=chat_id)
 
     # 隐私对话二次校验（兜底）
-    if chat_entry.is_private and not request.session.get(f'private_chat_verified_{chat_id}', False):
-        return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+    #if chat_entry.is_private and not request.session.get(f'private_chat_verified_{chat_id}', False):
+    #    return redirect('chat:chat_verify_privacy', chat_id=chat_id)
 
     # 清理临时标记（防止重复使用）
     #del request.session[f'from_info_{chat_id}']
@@ -359,11 +359,15 @@ def chat_detail(request, chat_id):
 
     if chat_entry.is_private:
         if not request.session.get(f'private_chat_{chat_id}', False):
-            return redirect('private_chat_verify', chat_id=chat_id)
-    chat_messages = chat_entry.messages.all().order_by('created_at')
+            return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+    #chat_messages = chat_entry.messages.all().order_by('created_at')
+    chat_messages = ChatMessage.objects.filter(
+        chat_entry=chat_entry
+    ).order_by('created_at')
     return render(request, 'chat/chat_detail.html', {
         'chat_entry': chat_entry,
-        'messages': chat_messages
+        'chat_messages': chat_messages,
+        'page_title': f"对话 - {chat_entry.title}",
     })
 
 @login_required

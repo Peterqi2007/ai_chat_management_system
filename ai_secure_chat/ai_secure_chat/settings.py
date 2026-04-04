@@ -335,3 +335,16 @@ ACCOUNTS_PROFILE_MODEL = "chat.UserProfile"
 ACCOUNTS_PROFILE_VIEWS_ENABLED = False
 ACCOUNTS_PROFILE_FORM_CLASS = "chat.forms.UserProfileForm"
 ACCOUNTS_PROFILE_FORM_EXCLUDE_FIELDS = ("privacy_password_hash","_api_key_encrypted",)
+
+# 关闭Mezzanine默认前端框架
+MEZZANINE_USE_BOOTSTRAP = False
+# 关闭框架自带的CSS压缩
+COMPRESS_ENABLED = False
+
+# 禁用HTML净化，保留自定义文本和样式
+HTML_SANITIZER_ALLOWED_TAGS = []
+HTML_SANITIZER_ALLOWED_ATTRIBUTES = []
+# 关闭富文本过滤
+RICHTEXT_FILTERS = []
+# 关闭模板缓存
+TEMPLATE_DEBUG = True

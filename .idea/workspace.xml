@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="前端1">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/base_chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/base_chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,19 +55,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "remove__session",
-    "last_opened_file_path": "E:/ai_secure_chat"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;remove__session&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\ai_secure_chat" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\ai_secure_chat\ai_secure_chat\chat\templates" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -156,7 +160,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775124697556</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug.">
+      <option name="closed" value="true" />
+      <created>1775281421584</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1775281421584</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -169,6 +181,7 @@
     <MESSAGE value="为聊天入口添加了标签便于分类，修复了隐私密码和api密钥明文存储的安全漏洞" />
     <MESSAGE value="1、在chatentry model中增加一个简介charfield 2、定义一个含有显示chatentry信息（包括对话标题，是否为隐私对话，关键字，用户描述等信息）和修改/删除chatentry功能的视图函数。 3、将隐私密码验证从chat_detail前移到这个页面的视图函数。 4、正确定义所有url" />
     <MESSAGE value="前端1" />
-    <option name="LAST_COMMIT_MESSAGE" value="前端1" />
+    <MESSAGE value="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug." />
+    <option name="LAST_COMMIT_MESSAGE" value="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug." />
   </component>
 </project>
