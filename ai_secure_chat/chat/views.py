@@ -253,7 +253,7 @@ def chat_entry_info(request, chat_id):
 
     # 标记：从info页准备进入对话（用于chat_detail权限校验）
     request.session[f'from_info_{chat_id}'] = True
-    '''
+
     context = {
         # 核心对象
         'chat_entry': chat_entry,
@@ -271,20 +271,10 @@ def chat_entry_info(request, chat_id):
         'max_tokens': chat_entry.max_tokens,
         # 时间信息（格式化）
         'created_at': chat_entry.created_at,
-        'updated_at': chat_entry.updated_at, #if hasattr(chat_entry, 'updated_at') else None, # 避免updated_at属性不存在导致的报错
+        'updated_at': chat_entry.updated_at if hasattr(chat_entry, 'updated_at') else None, # 避免updated_at属性不存在导致的报错
         # 页面配置
         'page_title': f"对话详情 - {chat_entry.title}",
         }
-    '''
-    # ✅ 修复：简化context，只传递核心对象（模板直接通过chat_entry访问字段，避免冲突）
-    context = {
-        'chat_entry': chat_entry,
-        'page_title': f"对话详情 - {chat_entry.title}",
-        # 可选：提前处理关键字（避免模板中出错）
-        'keywords': chat_entry.keywords.all(),
-    }
-
-
     return render(request, 'chat/chat_entry_info.html', context)
 
 
@@ -302,7 +292,7 @@ def chat_entry_create(request):
             chat_entry.save()
             # chat_entry.keywords.refresh_from_db()
             messages.success(request, '对话创建成功！')
-            return redirect('chat:folder_list_by_folder', folder_id=chat_entry.folder.id)
+            return redirect('chat:chat_entry_info', chat_id=chat_entry.id)
     else:
         form = ChatEntryForm(user=request.user)
     return render(request, 'chat/chat_entry_form.html', {'form': form, 'title': '创建对话'})
@@ -353,6 +343,7 @@ def private_chat_verify(request, chat_id):
 def chat_detail(request, chat_id):
     chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
 
+
     # ✅ 核心限制：仅允许从 chat_entry_info 跳转进入，禁止直接输URL访问
     if not request.session.get(f'from_info_{chat_id}', False):
         messages.error(request, "禁止直接访问！请从对话详情页进入")
@@ -363,11 +354,12 @@ def chat_detail(request, chat_id):
         return redirect('chat:chat_verify_privacy', chat_id=chat_id)
 
     # 清理临时标记（防止重复使用）
-    del request.session[f'from_info_{chat_id}']
+    #del request.session[f'from_info_{chat_id}']
 
-    #if chat_entry.is_private:
-        #if not request.session.get(f'private_chat_{chat_id}', False):
-            #return redirect('private_chat_verify', chat_id=chat_id)
+
+    if chat_entry.is_private:
+        if not request.session.get(f'private_chat_{chat_id}', False):
+            return redirect('private_chat_verify', chat_id=chat_id)
     chat_messages = chat_entry.messages.all().order_by('created_at')
     return render(request, 'chat/chat_detail.html', {
         'chat_entry': chat_entry,

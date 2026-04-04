@@ -59,9 +59,9 @@
                 <ul class="list-group">
                     {% for entry in folder.chat_entries.all %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="{% url 'chat:chat_entry_info' entry.id %}">{{ entry.title }}</a>
+                        <h3 class="card-title mb-0">{{ entry.title }}</h3>
                         <div>
-                            <a href="{% url 'chat:chat_detail' entry.id %}" class="btn btn-sm btn-primary me-2">进入对话</a>
+                            <a href="{% url 'chat:chat_entry_info' entry.id %}" class="btn btn-sm btn-primary me-2">进入对话</a>
                             <a href="{% url 'chat:chat_entry_delete' entry.id %}" class="btn btn-sm btn-danger">删除</a>
                         </div>
                     </li>

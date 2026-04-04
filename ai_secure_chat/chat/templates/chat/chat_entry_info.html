@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
-{% load keyword_tags %}  {# ✅ 必须导入 Mezzanine 关键字模板标签 #}
+{% load keyword_tags %}
 {% block title %}{{ chat_entry.title }}{% endblock %}
 
-{% block content %}
+{% block main %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <!-- 卡片头部 -->
                 <div class="card-header bg-primary bg-gradient text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">{{ page_title }}</h4>
-                    {% if is_private %}
+                    <!-- ✅ 改为 chat_entry.title（page_title可能不存在） -->
+                    <h4 class="mb-0">{{ chat_entry.title }}</h4>
+                    <!-- ✅ 改为 chat_entry.is_private -->
+                    {% if chat_entry.is_private %}
                         <span class="badge bg-danger">🔒 隐私对话</span>
                     {% else %}
                         <span class="badge bg-success">普通对话</span>
@@ -24,20 +26,22 @@
                     <div class="mb-4">
                         <h5 class="text-primary">基础信息</h5>
                         <hr>
-                        <p><strong>对话标题：</strong>{{ title }}</p>
-                        <p><strong>对话简介：</strong>{{ description|default:"暂无简介" }}</p>
+                        <!-- ✅ 统一改为 chat_entry.字段名 -->
+                        <p><strong>对话标题：</strong>{{ chat_entry.title }}</p>
+                        <p><strong>对话简介：</strong>{{ chat_entry.description|default:"暂无简介" }}</p>
                         <p><strong>所属文件夹：</strong>
-                            {% if folder %}
-                                <span class="badge bg-info">{{ folder.name }}</span>
+                            {% if chat_entry.folder %}
+                                <span class="badge bg-info">{{ chat_entry.folder.name }}</span>
                             {% else %}
                                 <span class="text-muted">未分类</span>
                             {% endif %}
                         </p>
                     </div>
 
-                   <!-- ✅ 修复：Mezzanine KeywordsField 正确访问方式 -->
+                   <!-- ✅ 关键字：用Mezzanine官方标签（兼容所有场景） -->
                      <div class="mt-3">
                         <strong>对话关键字：</strong>
+                        {% keywords_for chat_entry as keywords %}  {# 从chat_entry中获取关键字 #}
                         {% if keywords %}
                             {% for keyword in keywords %}
                                 <span class="badge bg-primary me-2">{{ keyword.keyword }}</span>
@@ -52,9 +56,10 @@
                         <h5 class="text-primary">AI模型配置</h5>
                         <hr>
                         <div class="row">
-                            <div class="col-md-4"><strong>温度(Temperature)：</strong> {{ temperature }}</div>
-                            <div class="col-md-4"><strong>Top P：</strong> {{ top_p }}</div>
-                            <div class="col-md-4"><strong>最大Token(词元数)：</strong> {{ max_tokens }}</div>
+                            <!-- ✅ 改为 chat_entry.字段名 -->
+                            <div class="col-md-4"><strong>温度(Temperature)：</strong> {{ chat_entry.temperature }}</div>
+                            <div class="col-md-4"><strong>Top P：</strong> {{ chat_entry.top_p }}</div>
+                            <div class="col-md-4"><strong>最大Token(词元数)：</strong> {{ chat_entry.max_tokens }}</div>
                         </div>
                     </div>
 
@@ -62,23 +67,24 @@
                     <div class="mb-4">
                         <h5 class="text-primary">时间信息</h5>
                         <hr>
-                        <p><strong>创建时间：</strong>{{ created_at|date:"Y-m-d H:i:s" }}</p>
-                        <p><strong>更新时间：</strong>{{ updated_at|date:"Y-m-d H:i:s" }}</p>
+                        <!-- ✅ 改为 chat_entry.字段名，兼容字段不存在的情况 -->
+                        <p><strong>创建时间：</strong>{{ chat_entry.created_at|date:"Y-m-d H:i:s" }}</p>
+                        <p><strong>更新时间：</strong>{% if chat_entry.updated_at %}{{ chat_entry.updated_at|date:"Y-m-d H:i:s" }}{% else %}暂无{% endif %}</p>
                     </div>
 
-                    <!-- 操作按钮 -->
+                    <!-- 操作按钮：✅ 补充URL命名空间（chat:），避免跳转失败 -->
                     <div class="d-flex gap-2 flex-wrap mt-4">
-                        <a href="{% url 'chat_detail' chat_entry.id %}" class="btn btn-primary">
+                        <a href="{% url 'chat:chat_detail' chat_entry.id %}" class="btn btn-primary">
                             🚪 进入对话
                         </a>
-                        <a href="{% url 'chat_entry_update' chat_entry.id %}" class="btn btn-warning">
+                        <a href="{% url 'chat:chat_entry_update' chat_entry.id %}" class="btn btn-warning">
                             ✏️ 修改信息
                         </a>
-                        <a href="{% url 'chat_entry_delete' chat_entry.id %}" class="btn btn-danger"
+                        <a href="{% url 'chat:chat_entry_delete' chat_entry.id %}" class="btn btn-danger"
                            onclick="return confirm('确定删除该对话？此操作不可恢复！')">
                             🗑️ 删除对话
                         </a>
-                        <a href="{% url 'chat_entry_list' %}" class="btn btn-secondary">
+                        <a href="{% url 'chat:chat_entry_list' %}" class="btn btn-secondary">
                             ← 返回列表
                         </a>
                     </div>
