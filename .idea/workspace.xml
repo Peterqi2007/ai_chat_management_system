@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug.">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="用户消息成功显示">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/base_chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/base_chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
@@ -19,15 +18,15 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="frontend1" />
+        <entry key="$PROJECT_DIR$" value="independent_chat_detail" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -61,7 +60,7 @@
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;remove__session&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;api__test&quot;,
     &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
   }
 }</component>
@@ -168,7 +167,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775281421584</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="用户消息成功显示">
+      <option name="closed" value="true" />
+      <created>1775318400867</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1775318400867</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -182,6 +189,17 @@
     <MESSAGE value="1、在chatentry model中增加一个简介charfield 2、定义一个含有显示chatentry信息（包括对话标题，是否为隐私对话，关键字，用户描述等信息）和修改/删除chatentry功能的视图函数。 3、将隐私密码验证从chat_detail前移到这个页面的视图函数。 4、正确定义所有url" />
     <MESSAGE value="前端1" />
     <MESSAGE value="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug." />
-    <option name="LAST_COMMIT_MESSAGE" value="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug." />
+    <MESSAGE value="用户消息成功显示" />
+    <option name="LAST_COMMIT_MESSAGE" value="用户消息成功显示" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

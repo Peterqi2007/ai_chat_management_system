@@ -1,388 +1,190 @@
-{% extends "base_chat.html" %}
-{% load static %}
-{% block title %}{{ chat_entry.title }} - 对话详情{% endblock %}
-
-{% block extra_css %}
-<script>
-// 确保DOM完全加载后执行所有JS（核心：避免事件绑定失效）
-document.addEventListener('DOMContentLoaded', function() {
-    // 核心变量（增加空值校验）
-    const chatForm = document.getElementById('chatForm');
-    const userMessage = document.getElementById('userMessage');
-    const chatContainer = document.getElementById('chatContainer');
-    const loadingBubble = document.getElementById('loadingBubble');
-    const sendBtn = document.getElementById('sendBtn');
-    let emptyHint = document.getElementById('emptyHint');
-    const chatId = {{ chat_entry.id }};
-
-    // 空值校验：防止变量不存在导致JS中断
-    if (!chatForm || !userMessage || !chatContainer || !loadingBubble || !sendBtn) {
-        console.error('核心DOM元素缺失，无法初始化聊天功能');
-        return;
-    }
-
-    // 滚动到底部函数
-    function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    // 页面加载后滚动到底部 + 隐藏加载气泡
-    scrollToBottom();
-    loadingBubble.style.display = 'none';
-
-    // 气泡创建函数（极简版，确保无逻辑错误）
-    function createBubble(content, role) {
-        const bubble = document.createElement('div');
-        bubble.className = role === 'user' ? 'chat-bubble user-bubble' : 'chat-bubble ai-bubble';
-        // 直接赋值文本（避免嵌套DOM导致的渲染问题）
-        bubble.innerText = content;
-        // 简化时间戳（避免日期格式化错误）
-        const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        const timeEl = document.createElement('div');
-        timeEl.className = `bubble-time text-${role === 'user' ? 'end' : 'start'}`;
-        timeEl.innerText = time;
-        bubble.appendChild(timeEl);
-        return bubble;
-    }
-
-    // 表单提交核心逻辑（彻底阻止默认行为）
-    chatForm.addEventListener('submit', async function(e) {
-        // 1. 三重阻止：确保表单不提交
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        chatForm.submit = function() { return false; }; // 兜底禁用提交
-
-        const message = userMessage.value.trim();
-        if (!message) {
-            alert('请输入消息内容！');
-            return;
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ chat_entry.title }}</title>
+    <!-- Bootstrap5 国内CDN -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {margin: 0;padding: 0;box-sizing: border-box;}
+        body {background-color: #f5f7fa;padding: 20px;}
+        .back-btn {margin-bottom: 15px;}
+        .chat-container {
+            height: calc(100vh - 180px);
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
-        // 2. 同步创建并插入用户气泡（关键：这一步必须同步执行，不受任何异步影响）
-        const userBubble = createBubble(message, 'user');
-        if (emptyHint) {
-            emptyHint.remove();
-            emptyHint = null; // 避免重复移除
+        .chat-bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            word-wrap: break-word;
         }
-        chatContainer.appendChild(userBubble);
-        // 强制刷新DOM + 滚动（确保气泡显示）
-        chatContainer.offsetHeight; // 触发重绘
-        scrollToBottom();
-
-        // 3. 禁用按钮 + 显示加载气泡
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = '发送中...';
-        loadingBubble.style.display = 'block';
-        scrollToBottom();
-
-        // 4. 清空输入框
-        userMessage.value = '';
-
-        // 5. 异步请求（即使请求失败，用户气泡已显示）
-        try {
-            const formData = new FormData(chatForm); // 直接从表单获取数据（含CSRF）
-            const response = await fetch(`{% url 'chat:chat_stream' chat_entry.id %}`, {
-                method: 'POST',
-                body: formData,
-                credentials: 'same-origin',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest' // 标记AJAX请求
-                }
-            });
-
-            if (!response.ok) throw new Error(`HTTP错误：${response.status}`);
-
-            // 流式处理（即使这部分失败，用户气泡仍存在）
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let aiBubble = null;
-            let aiContent = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n\n').filter(line => line.startsWith('data: '));
-
-                for (const line of lines) {
-                    const data = JSON.parse(line.replace('data: ', ''));
-                    if (data.error) throw new Error(data.error);
-                    if (data.content) {
-                        if (!aiBubble) {
-                            loadingBubble.style.display = 'none';
-                            aiBubble = createBubble('', 'ai');
-                            chatContainer.appendChild(aiBubble);
-                        }
-                        aiContent += data.content;
-                        aiBubble.firstChild.innerText = aiContent;
-                        scrollToBottom();
-                    }
-                    if (data.done) {
-                        loadingBubble.style.display = 'none';
-                        sendBtn.disabled = false;
-                        sendBtn.innerHTML = '发送 <i class="fas fa-paper-plane"></i>';
-                        break;
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('请求失败：', error);
-            alert('消息发送失败，但已保存你的消息！');
-            // 异常时恢复状态，但保留用户气泡
-            loadingBubble.style.display = 'none';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '发送 <i class="fas fa-paper-plane"></i>';
+        .user-bubble {
+            background-color: #0d6efd;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
         }
-    });
-
-    // 回车发送（仅处理Enter，排除shift+Enter）
-    userMessage.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            chatForm.dispatchEvent(new Event('submit'));
+        .ai-bubble {
+            background-color: #e9ecef;
+            color: #212529;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
         }
-    });
-});
-</script>
-{% endblock %}
-
-{% block main %}
-<div class="container py-4">
-    <!-- 页面标题 -->
-    <div class="mb-4">
-        <h2>{{ chat_entry.title }}</h2>
-        <a href="{% url 'chat:chat_entry_info' chat_entry.id %}" class="btn btn-sm btn-secondary">
+        .loading-bubble {
+            display: none;
+            background-color: #e9ecef;
+            color: #6c757d;
+            margin-right: auto;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 75%;
+        }
+        .chat-input {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        #userMessage {
+            border-radius: 24px;
+            padding: 12px 20px;
+            border: 1px solid #dee2e6;
+            resize: none;
+        }
+        .send-btn {
+            border-radius: 24px;
+            padding: 12px 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回按钮（修复URL） -->
+    <div class="back-btn">
+        <a href="{% url 'chat:chat_entry_info' chat_entry.id %}" class="btn btn-outline-secondary btn-sm">
             ← 返回对话信息
         </a>
     </div>
 
-    <!-- 对话核心区域 -->
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <!-- 对话气泡容器 -->
-            <div id="chatContainer" class="chat-container">
-                <!-- 历史消息：从数据库加载 -->
-                {% for message in chat_messages %}
-                    {% if message.role == 'user' %}
-                        <div class="chat-bubble user-bubble">
-                            {{ message.content }}
-                            <div class="bubble-time text-end">
-                                {{ message.created_at|date:"H:i" }}
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="chat-bubble ai-bubble">
-                            {{ message.content }}
-                            <div class="bubble-time text-start">
-                                {{ message.created_at|date:"H:i" }}
-                            </div>
-                        </div>
-                    {% endif %}
-                {% empty %}
-                    <!-- 无历史消息提示 -->
-                    <div class="text-center text-muted mt-5" id="emptyHint">
-                        <i class="fas fa-comments fa-2x mb-2"></i>
-                        <p>暂无对话记录，开始你的第一次提问吧！</p>
-                    </div>
-                {% endfor %}
-
-                <!-- ✅ 修复1：加载气泡移入对话容器内，初始隐藏 -->
-                <div id="loadingBubble" class="loading-bubble">
-                    <span>AI 正在思考...</span>
-                    <span class="loading-dots">...</span>
-                </div>
-            </div>
-
-            <!-- 输入框区域 -->
-            <div class="chat-input-area">
-                <form id="chatForm" method="POST" novalidate>
-                    {% csrf_token %}
-                    <div class="d-flex gap-2">
-                        <textarea
-                            id="userMessage"
-                            name="message"
-                            class="form-control flex-grow-1"
-                            placeholder="输入你的问题，按回车发送..."
-                            required
-                        ></textarea>
-                        <button type="submit" id="sendBtn" class="send-btn btn-primary">
-                            发送 <i class="fas fa-paper-plane ms-1"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <!-- 聊天容器 -->
+    <div class="chat-container" id="chatContainer">
+        {% for message in chat_messages %}
+            {% if message.role == "user" %}
+                <div class="chat-bubble user-bubble">{{ message.content }}</div>
+            {% else %}
+                <div class="chat-bubble ai-bubble">{{ message.content }}</div>
+            {% endif %}
+        {% empty %}
+            <div class="text-center text-muted my-5">开始你的对话吧～</div>
+        {% endfor %}
+        <div class="loading-bubble" id="loadingBubble">AI 正在思考中...</div>
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-// 核心变量
-const chatForm = document.getElementById('chatForm');
-const userMessage = document.getElementById('userMessage');
-const chatContainer = document.getElementById('chatContainer');
-const loadingBubble = document.getElementById('loadingBubble');
-const sendBtn = document.getElementById('sendBtn');
-const emptyHint = document.getElementById('emptyHint');
-const chatId = {{ chat_entry.id }};
+    <!-- 输入表单 -->
+    <form class="chat-input" id="chatForm">
+        {% csrf_token %}
+        <textarea class="form-control flex-grow-1" id="userMessage" name="message" placeholder="输入消息..." rows="1" required></textarea>
+        <button type="submit" class="btn btn-primary send-btn">发送</button>
+    </form>
 
-// 页面加载后滚动到底部
-window.onload = () => {
-    scrollToBottom();
-    // 强制隐藏加载气泡（双重保险）
-    loadingBubble.style.display = 'none';
-};
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+    const chatForm = document.getElementById('chatForm');
+    const userMessage = document.getElementById('userMessage');
+    const chatContainer = document.getElementById('chatContainer');
+    const loadingBubble = document.getElementById('loadingBubble');
+    const streamUrl = "{% url 'chat:chat_stream' chat_entry.id %}";
 
-// 滚动到底部函数
-function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
+    // 滚动到底部
+    function scroll() { chatContainer.scrollTop = chatContainer.scrollHeight; }
 
-// ✅ 修复2：完善气泡创建函数（确保内容正确赋值）
-function createBubble(content, role) {
-    const bubble = document.createElement('div');
-    bubble.className = role === 'user' ? 'chat-bubble user-bubble' : 'chat-bubble ai-bubble';
-
-    // 核心：直接设置气泡文本内容（修复用户气泡无内容问题）
-    bubble.textContent = content;
-
-    // 添加时间戳
-    const timeEl = document.createElement('div');
-    timeEl.className = `bubble-time text-${role === 'user' ? 'end' : 'start'}`;
-    const now = new Date();
-    timeEl.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    bubble.appendChild(timeEl);
-
-    return bubble;
-}
-
-// ✅ 修复3：重构表单提交逻辑（先渲染用户气泡，再发起请求）
-chatForm.addEventListener('submit', async (e) => {
-    // 1. 强制阻止表单默认提交（核心：避免页面刷新导致气泡消失）
-    e.preventDefault();
-    e.stopPropagation();
-
-    const message = userMessage.value.trim();
-    if (!message) {
-        alert('请输入有效消息！');
-        return;
+    // 创建气泡
+    function addBubble(text, isUser) {
+        let div = document.createElement('div');
+        div.className = isUser ? 'chat-bubble user-bubble' : 'chat-bubble ai-bubble';
+        div.textContent = text;
+        chatContainer.appendChild(div);
+        scroll();
     }
 
-    // 2. 立即创建并渲染用户气泡（同步执行，确保必现）
-    const userBubble = createBubble(message, 'user');
-    // 移除空消息提示（如果存在）
-    if (emptyHint) emptyHint.remove();
-    // 追加用户气泡到对话容器
-    chatContainer.appendChild(userBubble);
-    // 立即滚动到底部（确保用户能看到自己的消息）
-    scrollToBottom();
+    // 表单提交
+    chatForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const msg = userMessage.value.trim();
+        if(!msg) return;
 
-    // 3. 禁用发送按钮，防止重复提交
-    sendBtn.disabled = true;
-    sendBtn.innerHTML = '发送中 <i class="fas fa-spinner fa-spin ms-1"></i>';
+        // 显示用户消息
+        addBubble(msg, true);
+        userMessage.value = '';
+        loadingBubble.style.display = 'block';
 
-    // 4. 显示AI加载气泡
-    loadingBubble.style.display = 'block';
-    scrollToBottom();
-
-    // 5. 清空输入框
-    userMessage.value = '';
-
-    try {
-        // 6. 构建请求数据（兼容Django CSRF校验）
-        const formData = new FormData();
-        formData.append('message', message);
-        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-        // 7. 发起POST流式请求（使用Fetch API，放弃不支持POST的EventSource）
-        const response = await fetch(`{% url 'chat:chat_stream' chat_entry.id %}`, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/event-stream',
-            },
-            body: formData,
-            credentials: 'same-origin',
-            cache: 'no-cache'
-        });
-
-        // 8. 校验响应状态
-        if (!response.ok) {
-            throw new Error(`请求失败：${response.status} ${response.statusText}`);
-        }
-
-        // 9. 处理流式响应
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let aiResponse = '';
+        let aiText = '';
         let aiBubble = null;
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+        try {
+            // 发送请求
+            const res = await fetch(streamUrl, {
+                method: 'POST',
+                body: new FormData(chatForm),
+                credentials: 'include'
+            });
 
-            // 解析SSE格式数据
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n\n').filter(line => line.trim() && line.startsWith('data: '));
+            // 极简流解析（核心修复）
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
 
-            for (const line of lines) {
-                try {
-                    const dataStr = line.replace(/^data: /, '').trim();
-                    if (!dataStr) continue;
-                    const data = JSON.parse(dataStr);
+            while(true) {
+                const { done, value } = await reader.read();
+                if(done) break;
 
-                    // 处理错误
-                    if (data.error) {
-                        throw new Error(data.error);
+                // 解码数据
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for(let line of lines) {
+                    if(line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.replace('data: ', ''));
+
+                            // 显示AI文字
+                            if(data.content) {
+                                loadingBubble.style.display = 'none';
+                                if(!aiBubble) {
+                                    aiBubble = document.createElement('div');
+                                    aiBubble.className = 'chat-bubble ai-bubble';
+                                    chatContainer.appendChild(aiBubble);
+                                }
+                                aiText += data.content;
+                                aiBubble.textContent = aiText;
+                                scroll();
+                            }
+                            if(data.done) loadingBubble.style.display = 'none';
+                        }catch(e){}
                     }
-
-                    // 处理流式内容
-                    if (data.content) {
-                        // 第一次接收内容：移除加载气泡，创建AI气泡
-                        if (!aiBubble) {
-                            loadingBubble.style.display = 'none'; // 隐藏加载气泡
-                            aiBubble = createBubble('', 'ai');
-                            chatContainer.appendChild(aiBubble);
-                        }
-                        // 逐字追加内容
-                        aiResponse += data.content;
-                        aiBubble.firstChild.textContent = aiResponse; // 替换AI气泡文本
-                        scrollToBottom();
-                    }
-
-                    // 流式结束
-                    if (data.done) {
-                        // 彻底移除加载气泡（双重保险）
-                        loadingBubble.style.display = 'none';
-                        // 恢复发送按钮
-                        sendBtn.disabled = false;
-                        sendBtn.innerHTML = '发送 <i class="fas fa-paper-plane ms-1"></i>';
-                        break;
-                    }
-                } catch (parseError) {
-                    console.warn('解析SSE数据失败：', parseError);
-                    continue;
                 }
             }
+        } catch (e) {
+            loadingBubble.style.display = 'none';
+            addBubble('请求失败', false);
         }
+    };
 
-    } catch (error) {
-        console.error('流式请求异常：', error);
-        alert(`对话失败：${error.message}`);
-        // 异常时恢复状态
-        loadingBubble.style.display = 'none';
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = '发送 <i class="fas fa-paper-plane ms-1"></i>';
-    }
-});
-
-// 回车发送（优化体验，排除shift+回车）
-userMessage.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        chatForm.dispatchEvent(new Event('submit'));
-    }
-});
-</script>
-{% endblock %}
+    // 回车发送
+    userMessage.onkeydown = (e) => {
+        if(e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.onsubmit(e);
+        }
+    };
+    </script>
+</body>
+</html>
