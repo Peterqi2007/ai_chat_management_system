@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="用户消息成功显示">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="实现预设文本的推送">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/services.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +23,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="independent_chat_detail" />
+        <entry key="$PROJECT_DIR$" value="api_test" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -54,16 +51,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;api__test&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "api__fix",
+    "last_opened_file_path": "E:/ai_secure_chat"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\ai_secure_chat" />
@@ -175,7 +172,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775318400867</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="实现预设文本的推送">
+      <option name="closed" value="true" />
+      <created>1775365925204</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1775365925204</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -190,7 +195,8 @@
     <MESSAGE value="前端1" />
     <MESSAGE value="修复chat_entry_info页面没有显示的bug,解决进入对话页面后回退再进入显示无进入权限的bug." />
     <MESSAGE value="用户消息成功显示" />
-    <option name="LAST_COMMIT_MESSAGE" value="用户消息成功显示" />
+    <MESSAGE value="实现预设文本的推送" />
+    <option name="LAST_COMMIT_MESSAGE" value="实现预设文本的推送" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
