@@ -102,87 +102,54 @@
     const userMessage = document.getElementById('userMessage');
     const chatContainer = document.getElementById('chatContainer');
     const loadingBubble = document.getElementById('loadingBubble');
-    const streamUrl = "{% url 'chat:chat_stream' chat_entry.id %}";
 
-    // 滚动到底部
-    function scroll() { chatContainer.scrollTop = chatContainer.scrollHeight; }
-
-    // 创建气泡
-    function addBubble(text, isUser) {
-        let div = document.createElement('div');
+    // 创建消息气泡
+    function addMessage(text, isUser = false) {
+        const div = document.createElement('div');
         div.className = isUser ? 'chat-bubble user-bubble' : 'chat-bubble ai-bubble';
         div.textContent = text;
         chatContainer.appendChild(div);
-        scroll();
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     // 表单提交
     chatForm.onsubmit = async (e) => {
         e.preventDefault();
         const msg = userMessage.value.trim();
-        if(!msg) return;
+        if (!msg) return;
 
         // 显示用户消息
-        addBubble(msg, true);
+        addMessage(msg, true);
         userMessage.value = '';
         loadingBubble.style.display = 'block';
 
-        let aiText = '';
-        let aiBubble = null;
-
         try {
-            // 发送请求
-            const res = await fetch(streamUrl, {
+            // ==============================================
+            // 🔥 修复点：手动构建FormData，强制传递message+csrf
+            // ==============================================
+            const formData = new FormData();
+            formData.append('message', msg);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            const res = await fetch("{% url 'chat:chat_send' chat_entry.id %}", {
                 method: 'POST',
-                body: new FormData(chatForm),
+                body: formData,
                 credentials: 'include'
             });
 
-            // 极简流解析（核心修复）
-            const reader = res.body.getReader();
-            const decoder = new TextDecoder();
-
-            while(true) {
-                const { done, value } = await reader.read();
-                if(done) break;
-
-                // 解码数据
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-
-                for(let line of lines) {
-                    if(line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.replace('data: ', ''));
-
-                            // 显示AI文字
-                            if(data.content) {
-                                loadingBubble.style.display = 'none';
-                                if(!aiBubble) {
-                                    aiBubble = document.createElement('div');
-                                    aiBubble.className = 'chat-bubble ai-bubble';
-                                    chatContainer.appendChild(aiBubble);
-                                }
-                                aiText += data.content;
-                                aiBubble.textContent = aiText;
-                                scroll();
-                            }
-                            if(data.done) loadingBubble.style.display = 'none';
-                        }catch(e){}
-                    }
-                }
-            }
-        } catch (e) {
+            const data = await res.json();
             loadingBubble.style.display = 'none';
-            addBubble('请求失败', false);
-        }
-    };
 
-    // 回车发送
-    userMessage.onkeydown = (e) => {
-        if(e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            chatForm.onsubmit(e);
+            if (data.status === 'success') {
+                addMessage(data.ai_content, false);
+            } else {
+                addMessage(data.msg || '请求失败', false);
+                console.log('后端错误：', data.msg); // 控制台看错误
+            }
+        } catch (err) {
+            loadingBubble.style.display = 'none';
+            addMessage('网络错误', false);
+            console.error('请求异常：', err);
         }
     };
     </script>

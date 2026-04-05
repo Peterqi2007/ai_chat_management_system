@@ -5,7 +5,9 @@ app_name = 'chat'  # 命名空间，与模板中{% url 'chat:xxx' %}对应
 
 urlpatterns = [
     # ===================== 流式对话接口 =====================
-    path('chat/<int:chat_id>/stream/', views.chat_stream, name='chat_stream'),
+    # path('chat/<int:chat_id>/stream/', views.chat_stream, name='chat_stream'),
+    # 新增：一次性发送消息的接口
+    path('<int:chat_id>/send/', views.chat_send, name='chat_send'),
 
     # ===================== 分类管理 =====================
     path('categories/', views.category_list, name='category_list'),

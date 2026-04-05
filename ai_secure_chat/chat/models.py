@@ -7,6 +7,7 @@ from django.utils import timezone
 from mezzanine.generic.fields import KeywordsField
 from cryptography.fernet import Fernet
 import hashlib
+import bcrypt
 import base64
 
 
@@ -59,7 +60,7 @@ class UserProfile(models.Model):
 
     # 密码验证方法
     def check_privacy_password(self, raw_password):
-        return self.privacy_password_hash == hashlib.sha256(raw_password.encode()).hexdigest()
+        return bcrypt.checkpw(raw_password.encode('utf-8'), self.privacy_password_hash.encode('utf-8'))
 
     class Meta:
         verbose_name = "用户资料"

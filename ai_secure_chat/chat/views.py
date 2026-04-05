@@ -1,7 +1,9 @@
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
 from django.urls import reverse
 from .models import Category, Folder, ChatEntry, UserProfile,ChatMessage
 from .forms import (
@@ -16,36 +18,56 @@ import time
 import sys
 
 
-# chat/views.py 最终版
+# 导入你的千问API非流式函数
+from .services import chat_completion
+
 @login_required
 @require_POST
-def chat_stream(request, chat_id):
-    print("🔥 视图100%执行")
+def chat_send(request, chat_id):
+    """
+    普通同步视图：一次性发送消息，接收完整AI回复
+    无流式、无生成器、无阻塞、无事务问题
+    """
+    try:
+        # 1. 获取参数
+        user_message = request.POST.get("message", "").strip()
+        # 调试打印（后台看是否收到消息）
+        print("🔍 后端收到消息：", user_message)
+        if not user_message:
+            return JsonResponse({"status": "error", "msg": "消息不能为空"}, status=400)
 
-    def event_stream():
-        print("✅ 生成器运行")
+        # 2. 获取对话（视图内执行，无事务阻塞）
+        chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
 
-        # 固定AI回复（逐字推送，无延迟卡死）
-        reply = "✅ 流式输出成功！AI正常工作啦！"
+        # 3. 保存用户消息（立即提交，无锁表）
+        ChatMessage.objects.create(
+            chat_entry=chat_entry,
+            role="user",
+            content=user_message
+        )
 
-        # 逐字推送（极短延迟，兼容WSGI）
-        for char in reply:
-            # 单次推送1个字符，无复杂逻辑
-            yield f"data: {json.dumps({'content': char})}\n\n".encode("utf-8")
+        # 4. 调用千问API → 获取【完整回复】（一次性调用）
+        ai_reply = chat_completion(chat_entry, user_message)
 
-        # 结束标记
-        yield b'data: {"done":true}\n\n'
-        print("📤 数据推送完成")
+        # 5. 保存AI回复
+        ChatMessage.objects.create(
+            chat_entry=chat_entry,
+            role="assistant",
+            content=ai_reply
+        )
 
-    # 标准响应头
-    response = StreamingHttpResponse(
-        event_stream(),
-        content_type="text/event-stream; charset=utf-8"
-    )
-    response['X-Accel-Buffering'] = 'no'
-    response['Cache-Control'] = 'no-cache'
-    return response
+        # 6. 一次性返回完整数据给前端
+        return JsonResponse({
+            "status": "success",
+            "ai_content": ai_reply
+        })
 
+    except Exception as e:
+        # 全局错误捕获
+        return JsonResponse({
+            "status": "error",
+            "msg": f"服务器错误：{str(e)}"
+        }, status=500)
 
 # ==============================================
 # 1. 分类列表视图 ✅【Claude优化版：加载关联文件夹】
@@ -330,8 +352,9 @@ def chat_detail(request, chat_id):
 
 
     if chat_entry.is_private:
-        if not request.session.get(f'private_chat_{chat_id}', False):
+        if not request.session.get(f'private_chat_verified_{chat_id}', False):
             return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+
     #chat_messages = chat_entry.messages.all().order_by('created_at')
     chat_messages = ChatMessage.objects.filter(
         chat_entry=chat_entry
