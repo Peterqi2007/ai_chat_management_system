@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="新建分支">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>

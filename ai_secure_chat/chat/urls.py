@@ -18,6 +18,8 @@ urlpatterns = [
     # ===================== 文件夹管理 =====================
     path('folders/', views.folder_list, name='folder_list'),
     path('folders/category/<int:category_id>/', views.folder_list, name='folder_list'),  # 按分类筛选文件夹
+    # 子文件夹详情（必传分类ID+文件夹ID）
+    path('folders/category/<int:category_id>/folder/<int:folder_id>/', views.folder_detail, name='folder_detail'),
     path('folder/create/', views.folder_create, name='folder_create'),
     path('folder/<int:pk>/update/', views.folder_update, name='folder_update'),
     path('folder/<int:pk>/delete/', views.folder_delete, name='folder_delete'),

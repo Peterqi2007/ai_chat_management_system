@@ -22,7 +22,7 @@
                 <h3 class="card-title mb-0">{{ folder.name }}</h3>
                 <div>
                     <!-- 进入子文件夹按钮（核心新增） -->
-                    <a href="{% url 'chat:folder_list' folder.id %}" class="btn btn-sm btn-info me-2">进入子文件夹</a>
+                    <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-sm btn-info me-2">进入子文件夹</a>
                     <a href="{% url 'chat:folder_update' folder.id %}" class="btn btn-sm btn-warning me-2">编辑</a>
                     <a href="{% url 'chat:folder_delete' folder.id %}" class="btn btn-sm btn-danger">删除</a>
                 </div>
@@ -39,7 +39,7 @@
                             <div class="card-body p-2">
                                 <span class="card-text">{{ child.name }}</span>
                                 <!-- 子文件夹跳转按钮 -->
-                                <a href="{% url 'chat:folder_list' child.id %}" class="btn btn-xs btn-info ms-2">进入</a>
+                                <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-xs btn-info ms-2">进入</a>
                             </div>
                         </div>
                     </div>

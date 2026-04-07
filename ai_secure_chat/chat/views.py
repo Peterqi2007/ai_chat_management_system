@@ -128,7 +128,8 @@ def folder_list(request, category_id=None):
         # 按分类筛选文件夹
         folders = Folder.objects.filter(
             user=request.user,
-            category_id=category_id
+            category_id=category_id,
+            parent_folder__isnull = True
         ).prefetch_related('child_folders', 'chat_entries').order_by('order', '-created_at')
         category = get_object_or_404(Category, id=category_id, user=request.user)
     else:
@@ -142,6 +143,42 @@ def folder_list(request, category_id=None):
     return render(request, 'chat/folder_list.html', {
         'folders': folders,
         'category': category
+    })
+
+
+@login_required
+def folder_detail(request, category_id, folder_id):
+    # 1. 校验分类权限
+    category = get_object_or_404(Category, id=category_id, user=request.user)
+
+    # 2. 校验当前文件夹权限
+    parent_folder = get_object_or_404(
+        Folder,
+        id=folder_id,
+        user=request.user,
+        category=category
+    )
+
+    # 3. 查询子文件夹
+    subfolders = Folder.objects.filter(
+        parent_folder=parent_folder,
+        user=request.user,
+        category=category
+    )
+
+    # 4. 🔥 修复：标准查询当前文件夹下的所有对话（无歧义、无报错）
+    chat_entries = ChatEntry.objects.filter(
+        folder=parent_folder,
+        user=request.user,
+        # category=category
+    ).order_by('-created_at')
+
+    return render(request, 'chat/folder_detail.html', {
+        'category': category,
+        'parent_folder': parent_folder,
+        'subfolders': subfolders,
+        'chat_entries': chat_entries,
+        'page_title': f'文件夹 - {parent_folder.name}'
     })
 
 # ==============================================
