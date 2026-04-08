@@ -8,11 +8,10 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
-                <!-- 卡片头部 -->
-                <div class="card-header bg-primary bg-gradient text-white d-flex justify-content-between align-items-center">
-                    <!-- ✅ 改为 chat_entry.title（page_title可能不存在） -->
+                <!-- 卡片头部：缩短宽度+强化立体感+优化美观度 -->
+                <div class="card-header bg-primary bg-gradient text-white d-flex justify-content-start align-items-center"
+                     style="max-width: 95%; margin: 0; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); border-radius: 10px; padding: 1.2rem 1.5rem; margin-top: 0.5rem;">
                     <h4 class="mb-0">{{ chat_entry.title }}</h4>
-                    <!-- ✅ 改为 chat_entry.is_private -->
                     {% if chat_entry.is_private %}
                         <span class="badge bg-danger">🔒 隐私对话</span>
                     {% else %}
@@ -25,8 +24,6 @@
                     <!-- 基础信息 -->
                     <div class="mb-4">
                         <h5 class="text-primary">基础信息</h5>
-                        <hr>
-                        <!-- ✅ 统一改为 chat_entry.字段名 -->
                         <p><strong>对话标题：</strong>{{ chat_entry.title }}</p>
                         <p><strong>对话简介：</strong>{{ chat_entry.description|default:"暂无简介" }}</p>
                         <p><strong>所属文件夹：</strong>
@@ -38,41 +35,27 @@
                         </p>
                     </div>
 
-                   <!-- ✅ 关键字：用Mezzanine官方标签（兼容所有场景） -->
-                     <div class="mt-3">
-                        <strong>对话关键字：</strong>
-                        {% keywords_for chat_entry as keywords %}  {# 从chat_entry中获取关键字 #}
-                        {% if keywords %}
-                            {% for keyword in keywords %}
-                                <span class="badge bg-primary me-2">{{ keyword.keyword }}</span>
-                            {% endfor %}
-                        {% else %}
-                            <span class="text-muted">暂无关键字</span>
-                        {% endif %}
-                     </div>
 
-                    <!-- 模型配置 -->
-                    <div class="mb-4">
+                    <hr class="my-2 border-primary opacity-75">
+
+                    <!-- 模型配置：修正分割线排版 -->
+                    <div class="mb-4 mt-5">
                         <h5 class="text-primary">AI模型配置</h5>
-                        <hr>
                         <div class="row">
-                            <!-- ✅ 改为 chat_entry.字段名 -->
                             <div class="col-md-4"><strong>温度(Temperature)：</strong> {{ chat_entry.temperature }}</div>
                             <div class="col-md-4"><strong>Top P：</strong> {{ chat_entry.top_p }}</div>
                             <div class="col-md-4"><strong>最大Token(词元数)：</strong> {{ chat_entry.max_tokens }}</div>
                         </div>
                     </div>
-
-                    <!-- 时间信息 -->
-                    <div class="mb-4">
+                    <hr class="my-2 border-primary opacity-75">
+                    <!-- 时间信息：修正分割线排版 -->
+                    <div class="mb-4 mt-5">
                         <h5 class="text-primary">时间信息</h5>
-                        <hr>
-                        <!-- ✅ 改为 chat_entry.字段名，兼容字段不存在的情况 -->
                         <p><strong>创建时间：</strong>{{ chat_entry.created_at|date:"Y-m-d H:i:s" }}</p>
                         <p><strong>更新时间：</strong>{% if chat_entry.updated_at %}{{ chat_entry.updated_at|date:"Y-m-d H:i:s" }}{% else %}暂无{% endif %}</p>
                     </div>
 
-                    <!-- 操作按钮：✅ 补充URL命名空间（chat:），避免跳转失败 -->
+                    <!-- 操作按钮：修改返回列表URL为子文件夹详情 -->
                     <div class="d-flex gap-2 flex-wrap mt-4">
                         <a href="{% url 'chat:chat_detail' chat_entry.id %}" class="btn btn-primary">
                             🚪 进入对话
@@ -84,7 +67,11 @@
                            onclick="return confirm('确定删除该对话？此操作不可恢复！')">
                             🗑️ 删除对话
                         </a>
-                        <a href="{% url 'chat:chat_entry_list' %}" class="btn btn-secondary">
+                        {% if chat_entry.folder and chat_entry.folder.category %}
+                            <a href="{% url 'chat:folder_detail' category_id=chat_entry.folder.category.id folder_id=chat_entry.folder.id %}" class="btn btn-secondary">
+                        {% else %}
+                            <a href="#" class="btn btn-secondary">
+                        {% endif %}
                             ← 返回列表
                         </a>
                     </div>

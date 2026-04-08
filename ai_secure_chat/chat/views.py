@@ -256,11 +256,11 @@ def chat_verify_privacy(request, chat_id):
     """独立的隐私密码验证页面，强制重定向访问"""
     chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
     profile = get_object_or_404(UserProfile, user=request.user)
-    session_key = f'private_chat_verified_{chat_id}'
+    temp_session_key = f'private_chat_once_{chat_id}'
 
     # 已验证直接返回信息页
-    if request.session.get(session_key):
-        return redirect('chat:chat_entry_info', chat_id=chat_id)
+    # if request.session.get(session_key):
+        # return redirect('chat:chat_entry_info', chat_id=chat_id)
 
     if request.method == 'POST':
         form = PrivacyPasswordVerifyForm(request.POST)
@@ -268,8 +268,9 @@ def chat_verify_privacy(request, chat_id):
             pwd = form.cleaned_data['privacy_password']
             # 验证密码（你模型中的哈希验证方法）
             if profile.check_privacy_password(pwd):
-                request.session[session_key] = True
-                # 验证通过 → 跳回对话信息页
+                # ✅ 设置一次性验证标记
+                request.session[temp_session_key] = True
+                # 跳回info页，本次允许访问
                 return redirect('chat:chat_entry_info', chat_id=chat_id)
             form.add_error('privacy_password', '密码错误，请重试！')
     else:
@@ -284,11 +285,16 @@ def chat_verify_privacy(request, chat_id):
 @login_required
 def chat_entry_info(request, chat_id):
     chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
-    session_key = f'private_chat_verified_{chat_id}'
+    # 一次性验证标记（仅本次访问有效）
+    temp_session_key = f'private_chat_once_{chat_id}'
 
-    # ✅ 核心修正：隐私对话 + 未验证 → 强制重定向到独立验证URL
-    if chat_entry.is_private and not request.session.get(session_key, False):
-        return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+    # ========== 隐私对话校验 ==========
+    if chat_entry.is_private:
+        # 仅当 没有一次性标记时，跳转到密码页
+        if not request.session.get(temp_session_key, False):
+            return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+        # ✅ 验证通过后，立即删除标记（下次进入必须重新输密码）
+        del request.session[temp_session_key]
 
     # 标记：从info页准备进入对话（用于chat_detail权限校验）
     request.session[f'from_info_{chat_id}'] = True
