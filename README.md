@@ -53,45 +53,54 @@
    ```
 
 4. **创建虚拟环境变量**
-   - 设置
+   - 设置DEBUG,SECRET_KET,DATABASES等变量
 
-5. **运行应用:**
+5. **执行数据库迁移**
+   ```bash
+   cd ai_secure_chat
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+6. **运行应用:**
    ```bash
    python app.py
    ```
-   > The server will start on `http://localhost:8000` by default.
+   > 网站默认在 `http://localhost:8000` 上运行.
 
 ---
 
-## Usage
+## 使用
 
-- Access the web interface at [http://localhost:8000](http://localhost:8000).
-- Configure chat models and manage users via the dashboard.
-- Review, export, or clear chat histories as needed.
-
----
-
-## Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the repository.
-2. Create your feature branch: `git checkout -b feature/YourFeature`
-3. Commit your changes: `git commit -am 'Add your feature'`
-4. Push to the branch: `git push origin feature/YourFeature`
-5. Open a pull request.
+- 在 [http://localhost:8000](http://localhost:8000) 上进入网站.
+- 在 [http://localhost:8000/admin/](http://localhost:8000/admin/)上管理网站模型设置和用户（先注册网站管理员）
+- 自定义分类、文件夹和对话
 
 ---
 
-## License
+## 贡献指南
 
-[MIT License](LICENSE)
+欢迎提交拉取请求！对于重大变更，请先提交 Issue 讨论你想要修改的内容。
+
+1.复刻（Fork）本仓库。
+2.创建功能分支：git checkout -b feature/YourFeature
+3.提交变更：git commit -am 'Add your feature'
+4.推送到分支：git push origin feature/YourFeature
+5.打开拉取请求。
 
 ---
 
-## Contact
+## 许可证
 
-For support or business inquiries, please contact [Peterqi2007](https://github.com/Peterqi2007).
+[MIT 许可证](LICENSE)
+
+---
+
+## 联系方式
+有任何技术交流联系 [Peterqi2007](https://github.com/Peterqi2007).
+
+
+
 
 # AI Chat Management System
 
