@@ -31,8 +31,6 @@ def chat_send(request, chat_id):
     try:
         # 1. 获取参数
         user_message = request.POST.get("message", "").strip()
-        # 调试打印（后台看是否收到消息）
-        print("🔍 后端收到消息：", user_message)
         if not user_message:
             return JsonResponse({"status": "error", "msg": "消息不能为空"}, status=400)
 
