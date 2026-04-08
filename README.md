@@ -1,75 +1,184 @@
-AI Chat Management System
-A secure, hierarchical chat content management system built with Django and Mezzanine, designed for categorizing, managing, and controlling access to LLM (Large Language Model) conversation records.
-Features
-Hierarchical structure: Category → Folder → Subfolder → Chat Entry
-Privacy protection with password encryption for sensitive conversations
-Independent data isolation for different users
-Complete CRUD operations for chat records & folders
-Customizable LLM parameters: temperature, top_p, max_tokens
-Responsive UI with Bootstrap 5
-Mezzanine CMS integration for page & content management
-Secure password verification for private chats (per-access validation)
-Tech Stack
-Backend: Django 4.2+, Mezzanine 6.0+
-Frontend: Bootstrap 5, Vanilla JavaScript
-Database: SQLite (default), PostgreSQL/MySQL compatible
-Security: Django Auth, CSRF protection, password hashing
-LLM Support: Qwen, Minimax, and other mainstream LLMs
-Installation & Setup
-1. Clone the Repository
-bash
-运行
-git clone https://github.com/Peterqi2007/ai_chat_management_system.git
-cd ai_chat_management_system
-2. Create Virtual Environment
-bash
-运行
-# Create venv
-python -m venv venv
+# 人工智能大模型对话管理系统
 
-# Activate (Windows)
-venv\Scripts\activate
-# Activate (macOS/Linux)
-source venv/bin/activate
-3. Install Dependencies
-bash
-运行
-pip install -r requirements.txt
-4. Environment Configuration
-Create a .env file in the project root:
-env
-SECRET_KEY=your-django-secret-key
-DEBUG=False
-ALLOWED_HOSTS=localhost,127.0.0.1
+结构化、安全且智能的大语言模型（LLM）聊天管理系统
 
-# LLM API Keys (optional)
-QWEN_API_KEY=your-qwen-api-key
-MINIMAX_API_KEY=your-minimax-api-key
-5. Database Migration
-bash
-运行
-python manage.py makemigrations
-python manage.py migrate
-6. Create Superuser
-bash
-运行
-python manage.py createsuperuser
-7. Run Development Server
-bash
-运行
-python manage.py runserver
-Web: http://127.0.0.1:8000/
-Admin: http://127.0.0.1:8000/admin/
-Mezzanine CMS: http://127.0.0.1:8000/cms/
-Usage
-Create top-level Categories
-Manage Folders & Subfolders under each category
-Create & organize Chat Entries
-Set passwords for private conversations
-Configure LLM parameters for each chat
-View, edit, delete records with permission control
-Open Source License
-This project is licensed under the MIT License – see the 
- file for details.
-Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+---
+
+## 简介
+
+**人工智能大语言模型对话管理系统** 是一款基于django框架，使用mezzanine的web应用，核心功能为实时大模型交互、对话分类分层管理和隐私对话加密，可为个人用户整理聊天内容和企业进行AI工作对话管理提供帮助。
+
+---
+
+## 核心功能
+
+- **结构化聊天记录**：整理对话内容，便于追踪和检索。一级目录为分类category，其余目录为文件夹folder。支持文件夹多层嵌套。文件夹内可同时存储子文件夹和ai对话入口。支持文件夹的移动、重命名和删除，分类的重命名和删除。创建或进入对话后会显示信息栏，用户可随时调整temperature,top_p等参数，为对话撰写简介，更改对话的隐私状态，查看对话的创建和更新时间。（注：关键字功能尚未开发完成）
+- **安全通信**：采用完善的安全措施保护用户数据和聊天日志。隐私对话使用特设的隐私密码进行保护。隐私密码采用哈希加密方案存储于数据库。api密钥采用fernet加密方案，密钥为django内设SECRET_KEY，有效阻止密码和api密钥泄露。
+- **智能集成**：轻松连接并管理不同的大语言模型后端。（注：目前仅支持千问大语言模型，更多模型接入仍在开发中。采用openai sdk接入api，用户可自行修改代码实现其他模型对话。流式对话功能尚未实现。）
+- **用户管理**：基于角色的访问权限、身份验证以及用户行为追踪。（部分功能仍在开发中，未来将支持不同账号聊天信息的共享，评论）
+- **Web界面**：使用HTML和JavaScript构建的直观仪表盘，用于聊天管理。
+
+---
+
+## 技术栈
+
+- **Python** (70.3%) – 后端核心开发语言
+- **Django** - 后端框架（未来将使用DRF）
+- **Mezzanine** - 提供用户管理、导航栏功能（未来将用于添加博客app）
+- **HTML** (27%) – 网页渲染
+- **JavaScript** (2.7%) – 前端交互与增强，主要用于对话界面
+- **Bootstrap5** - 前端主要使用的库，适配mezzanine
+- **SQLite** - 数据库
+尚未完成云服务器部署配置，预计使用Docker引擎
+
+---
+
+## 下载
+
+1. **克隆仓库:**
+   ```bash
+   git clone https://github.com/Peterqi2007/ai_chat_management_system.git
+   cd ai_chat_management_system
+   ```
+
+2. **创建并激活虚拟环境:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **下载依赖项:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **创建虚拟环境变量**
+   - 设置
+
+5. **运行应用:**
+   ```bash
+   python app.py
+   ```
+   > The server will start on `http://localhost:8000` by default.
+
+---
+
+## Usage
+
+- Access the web interface at [http://localhost:8000](http://localhost:8000).
+- Configure chat models and manage users via the dashboard.
+- Review, export, or clear chat histories as needed.
+
+---
+
+## Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository.
+2. Create your feature branch: `git checkout -b feature/YourFeature`
+3. Commit your changes: `git commit -am 'Add your feature'`
+4. Push to the branch: `git push origin feature/YourFeature`
+5. Open a pull request.
+
+---
+
+## License
+
+[MIT License](LICENSE)
+
+---
+
+## Contact
+
+For support or business inquiries, please contact [Peterqi2007](https://github.com/Peterqi2007).
+
+# AI Chat Management System
+
+Structured, Secure, and Smart LLM Chat Management System
+
+---
+
+## Overview
+
+**AI Chat Management System** is a powerful, structured, and secure platform designed to manage Large Language Model (LLM) chats efficiently and intelligently. It provides tools and interfaces for handling chat history, user management, security, and integration with language models, enabling seamless interaction and robust control for enterprise or individual use.
+
+---
+
+## Features
+
+- **Structured Chat History:** Organize conversations for easy tracking and retrieval.
+- **Secure Communication:** Robust security measures to protect user data and chat logs.
+- **Smart Integrations:** Easily connect and manage different LLM backends.
+- **User Management:** Role-based access, authentication, and user activity tracking.
+- **Web Interface:** Intuitive dashboard built with HTML and JavaScript for chat management.
+
+---
+
+## Tech Stack
+
+- **Python** (70.3%) – Core logic and API backend
+- **HTML** (27%) – Web interface
+- **JavaScript** (2.7%) – Frontend interactivity and enhancements
+
+---
+
+## Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Peterqi2007/ai_chat_management_system.git
+   cd ai_chat_management_system
+   ```
+
+2. **Create and activate a virtual environment (optional but recommended):**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables:**
+   - Copy `.env.example` to `.env` and modify as necessary.
+
+5. **Run the application:**
+   ```bash
+   python app.py
+   ```
+   > The server will start on `http://localhost:8000` by default.
+
+---
+
+## Usage
+
+- Access the web interface at [http://localhost:8000](http://localhost:8000).
+- Configure chat models and manage users via the dashboard.
+- Review, export, or clear chat histories as needed.
+
+---
+
+## Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository.
+2. Create your feature branch: `git checkout -b feature/YourFeature`
+3. Commit your changes: `git commit -am 'Add your feature'`
+4. Push to the branch: `git push origin feature/YourFeature`
+5. Open a pull request.
+
+---
+
+## License
+
+[MIT License](LICENSE)
+
+---
+
+## Contact
+
+For support or business inquiries, please contact [Peterqi2007](https://github.com/Peterqi2007).
