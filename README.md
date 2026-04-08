@@ -83,9 +83,9 @@
 欢迎提交拉取请求！对于重大变更，请先提交 Issue 讨论你想要修改的内容。
 
 1. 复刻（Fork）本仓库。
-2. 创建功能分支：git checkout -b feature/YourFeature
-3. 提交变更：git commit -am 'Add your feature'
-4. 推送到分支：git push origin feature/YourFeature
+2. 创建功能分支：`git checkout -b feature/YourFeature`
+3. 提交变更：`git commit -am 'Add your feature'`
+4. 推送到分支：`git push origin feature/YourFeature`
 5. 打开拉取请求。
 
 ---
