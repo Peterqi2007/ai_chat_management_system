@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="新建分支">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="fix the bug: cannot enter subfolder. Only root folders are visible in category view now.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/category_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/category_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -191,7 +192,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775372845588</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="fix the bug: cannot enter subfolder. Only root folders are visible in category view now.">
+      <option name="closed" value="true" />
+      <created>1775572976931</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1775572976931</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -208,7 +217,8 @@
     <MESSAGE value="用户消息成功显示" />
     <MESSAGE value="实现预设文本的推送" />
     <MESSAGE value="新建分支" />
-    <option name="LAST_COMMIT_MESSAGE" value="新建分支" />
+    <MESSAGE value="fix the bug: cannot enter subfolder. Only root folders are visible in category view now." />
+    <option name="LAST_COMMIT_MESSAGE" value="fix the bug: cannot enter subfolder. Only root folders are visible in category view now." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

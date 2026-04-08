@@ -16,9 +16,11 @@
                         <p class="text-muted small mb-0">{{ category.description|default:"暂无描述" }}</p>
                     </div>
                     <div>
-                        <a href="{% url 'chat:folder_list' category.id %}" class="btn btn-sm btn-primary">查看文件夹</a>
-                        <a href="{% url 'chat:category_update' category.id %}" class="btn btn-sm btn-warning mx-1">编辑</a>
-                        <a href="{% url 'chat:category_delete' category.id %}" class="btn btn-sm btn-danger">删除</a>
+                        <a href="{% url 'chat:folder_list' category.id %}" class="btn btn-sm btn-primary hover-scale transition-all">查看文件夹</a>
+                        <a href="{% url 'chat:category_update' category.id %}" class="btn btn-sm btn-warning hover-scale transition-all mx-1">编辑</a>
+                        <a href="{% url 'chat:category_delete' category.id %}"
+                           onclick="return confirm('确定要删除该分类吗？删除后分类内的所有内容将一并删除！')"
+                           class="btn btn-sm btn-danger hover-scale transition-all">删除</a>
                     </div>
                 </div>
             </div>
@@ -27,5 +29,23 @@
             {% endfor %}
         </div>
     </div>
+    <!-- 自定义样式 - 优化 hover 效果和过渡 -->
+    <style>
+        /* 按钮 hover 缩放效果 */
+        .hover-scale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        /* 过渡动画 */
+        .transition-all {
+            transition: all 0.2s ease;
+        }
+        /* 修复mezzanine可能的样式冲突 */
+        .card-body a.btn {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
 </div>
 {% endblock %}

@@ -8,8 +8,8 @@
         <h2>{{ category.name|default:"顶级文件夹" }}</h2>
         <!-- 新建文件夹 + 新建对话 按钮组 -->
         <div class="mt-2">
-            <a href="{% url 'chat:folder_create' %}" class="btn btn-primary">新建文件夹</a>
-            <a href="{% url 'chat:chat_entry_create' %}" class="btn btn-success">新建对话Entry</a>
+            <a href="{% url 'chat:folder_create' %}" class="btn btn-primary hover-scale transition-all">新建文件夹</a>
+            <a href="{% url 'chat:chat_entry_create' %}" class="btn btn-success hover-scale transition-all">新建对话Entry</a>
         </div>
     </div>
 
@@ -22,9 +22,13 @@
                 <h3 class="card-title mb-0">{{ folder.name }}</h3>
                 <div>
                     <!-- 进入子文件夹按钮（核心新增） -->
-                    <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-sm btn-info me-2">进入子文件夹</a>
-                    <a href="{% url 'chat:folder_update' folder.id %}" class="btn btn-sm btn-warning me-2">编辑</a>
-                    <a href="{% url 'chat:folder_delete' folder.id %}" class="btn btn-sm btn-danger">删除</a>
+                    <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-sm btn-info hover-scale transition-all me-2">进入子文件夹</a>
+                    <a href="{% url 'chat:folder_update' folder.id %}" class="btn btn-sm btn-warning hover-scale transition-all me-2">编辑</a>
+                    <a href="{% url 'chat:folder_delete' folder.id %}"
+                        onclick="return confirm('确定要删除该文件夹吗？删除后文件夹内的所有内容将一并删除！')"
+                        class="btn btn-sm btn-danger px-4 py-2 rounded-3 hover-scale transition-all me-2">
+                        <i class="bi bi-trash me-1"></i> 删除
+                    </a>
                 </div>
             </div>
 
@@ -39,7 +43,7 @@
                             <div class="card-body p-2">
                                 <span class="card-text">{{ child.name }}</span>
                                 <!-- 子文件夹跳转按钮 -->
-                                <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-xs btn-info ms-2">进入</a>
+                                <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-xs btn-info hover-scale transition-all ms-2">进入</a>
                             </div>
                         </div>
                     </div>
@@ -61,8 +65,8 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <h3 class="card-title mb-0">{{ entry.title }}</h3>
                         <div>
-                            <a href="{% url 'chat:chat_entry_info' entry.id %}" class="btn btn-sm btn-primary me-2">进入对话</a>
-                            <a href="{% url 'chat:chat_entry_delete' entry.id %}" class="btn btn-sm btn-danger">删除</a>
+                            <a href="{% url 'chat:chat_entry_info' entry.id %}" class="btn btn-sm btn-primary hover-scale transition-all me-2">进入对话</a>
+                            <a href="{% url 'chat:chat_entry_delete' entry.id %}" class="btn btn-sm hover-scale transition-all btn-danger">删除</a>
                         </div>
                     </li>
                     {% endfor %}
@@ -71,7 +75,7 @@
                 <p class="text-muted">暂无对话条目</p>
                 {% endif %}
                 <!-- 针对当前文件夹的「新建对话」按钮（新增） -->
-                <a href="{% url 'chat:chat_entry_create' %}?folder_id={{ folder.id }}" class="btn btn-sm btn-success mt-2">
+                <a href="{% url 'chat:chat_entry_create' %}?folder_id={{ folder.id }}" class="btn btn-sm btn-success hover-scale transition-all mt-2">
                     在此文件夹新建对话
                 </a>
             </div>
@@ -83,5 +87,25 @@
         暂无文件夹，<a href="{% url 'chat:folder_create' %}">点击创建第一个文件夹</a>
     </div>
     {% endfor %}
+
+    <!-- 自定义样式 - 优化 hover 效果和过渡 -->
+    <style>
+        /* 按钮 hover 缩放效果 */
+        .hover-scale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        /* 过渡动画 */
+        .transition-all {
+            transition: all 0.2s ease;
+        }
+        /* 修复mezzanine可能的样式冲突 */
+        .card-body a.btn {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+
 </div>
 {% endblock %}

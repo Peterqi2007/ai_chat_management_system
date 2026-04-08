@@ -74,6 +74,31 @@
         </div>
     </div>
 
+        <!-- 新增功能按钮区域 -->
+    <div class="mt-5 d-flex gap-3 flex-wrap">
+        <!-- 新建文件夹按钮 - 传递分类ID和父文件夹ID作为GET参数 -->
+        <a href="{% url 'chat:folder_create' %}?category_id={{ category.id }}&parent_folder_id={{ parent_folder.id }}"
+           class="btn btn-primary px-4 py-2 rounded-3 hover-scale transition-all">
+            <i class="bi bi-folder-plus me-1"></i> 新建文件夹
+        </a>
+        <!-- 新建对话按钮 - 传递文件夹ID作为GET参数 -->
+        <a href="{% url 'chat:chat_entry_create' %}?folder_id={{ parent_folder.id }}"
+           class="btn btn-success px-4 py-2 rounded-3 hover-scale transition-all">
+            <i class="bi bi-chat-plus me-1"></i> 新建对话
+        </a>
+        <!-- 编辑文件夹按钮 - 传递文件夹PK（ID） -->
+        <a href="{% url 'chat:folder_update' parent_folder.id %}"
+           class="btn btn-warning px-4 py-2 rounded-3 hover-scale transition-all">
+            <i class="bi bi-pencil me-1"></i> 编辑文件夹
+        </a>
+        <!-- 删除文件夹按钮 - 传递文件夹PK（ID）+ 确认提示 -->
+        <a href="{% url 'chat:folder_delete' parent_folder.id %}"
+           onclick="return confirm('确定要删除该文件夹吗？删除后文件夹内的所有内容将一并删除！')"
+           class="btn btn-danger px-4 py-2 rounded-3 hover-scale transition-all">
+            <i class="bi bi-trash me-1"></i> 删除
+        </a>
+    </div>
+
     <!-- 自定义样式 - 优化 hover 效果和过渡 -->
     <style>
         /* 按钮 hover 缩放效果 */

@@ -193,7 +193,11 @@ def folder_create(request):
             folder.user = request.user
             folder.save()
             messages.success(request, '文件夹创建成功！')
-            return redirect('chat:folder_list')
+            # 如果为根文件夹，就重定向至folder_list.如果不是,重定向至folder_detail
+            if folder.parent_folder:
+                return redirect('chat:folder_detail',folder.category_id,folder.id)
+            else:
+                return redirect('chat:folder_list',folder.category_id)
     else:
         form = FolderForm(user=request.user)
     return render(request, 'chat/folder_form.html', {'form': form, 'title': '创建文件夹'})
@@ -204,9 +208,13 @@ def folder_update(request, pk):
     if request.method == 'POST':
         form = FolderForm(request.POST, user=request.user, instance=folder)
         if form.is_valid():
-            form.save()
+            folder = form.save(commit=False)
+            folder.save()
             messages.success(request, '文件夹更新成功！')
-            return redirect('chat:folder_list')
+            if folder.parent_folder:
+                return redirect('chat:folder_detail',folder.category_id,folder.id)
+            else:
+                return redirect('chat:folder_list',folder.category_id)
     else:
         form = FolderForm(user=request.user, instance=folder)
     return render(request, 'chat/folder_form.html', {'form': form, 'title': '编辑文件夹'})
@@ -306,6 +314,7 @@ def chat_entry_info(request, chat_id):
         # 页面配置
         'page_title': f"对话详情 - {chat_entry.title}",
         }
+
     return render(request, 'chat/chat_entry_info.html', context)
 
 
@@ -384,13 +393,13 @@ def chat_detail(request, chat_id):
     #if chat_entry.is_private and not request.session.get(f'private_chat_verified_{chat_id}', False):
     #    return redirect('chat:chat_verify_privacy', chat_id=chat_id)
 
-    # 清理临时标记（防止重复使用）
-    #del request.session[f'from_info_{chat_id}']
 
 
-    if chat_entry.is_private:
-        if not request.session.get(f'private_chat_verified_{chat_id}', False):
-            return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+    #if chat_entry.is_private:
+        #if not request.session.get(f'private_chat_verified_{chat_id}', False):
+            #return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+
+
 
     #chat_messages = chat_entry.messages.all().order_by('created_at')
     chat_messages = ChatMessage.objects.filter(
