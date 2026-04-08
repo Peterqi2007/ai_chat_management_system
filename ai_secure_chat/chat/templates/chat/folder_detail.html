@@ -59,7 +59,7 @@
             {% if chat_entries %}
                 <div class="d-flex flex-column gap-2">
                     {% for chat in chat_entries %}
-                    <a href="{% url 'chat:chat_detail' chat.id %}"
+                    <a href="{% url 'chat:chat_entry_info' chat.id %}"
                        class="btn btn-outline-success rounded-3 py-2 text-start hover-scale transition-all">
                         <i class="bi bi-chat-left me-3"></i> {{ chat.title }}
                     </a>

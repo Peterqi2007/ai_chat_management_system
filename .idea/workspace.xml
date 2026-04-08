@@ -4,12 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="下架取消功能，美化样式">
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="下架关键字功能，上架表单页面取消功能，修复对话界面按enter键后ai对话不返回的bug">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -216,7 +214,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775644314576</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="下架关键字功能，上架表单页面取消功能，修复对话界面按enter键后ai对话不返回的bug">
+      <option name="closed" value="true" />
+      <created>1775650501802</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1775650501802</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -236,7 +242,8 @@
     <MESSAGE value="fix the bug: cannot enter subfolder. Only root folders are visible in category view now." />
     <MESSAGE value="美化了样式并修复新建、修改文件夹的报错" />
     <MESSAGE value="下架取消功能，美化样式" />
-    <option name="LAST_COMMIT_MESSAGE" value="下架取消功能，美化样式" />
+    <MESSAGE value="下架关键字功能，上架表单页面取消功能，修复对话界面按enter键后ai对话不返回的bug" />
+    <option name="LAST_COMMIT_MESSAGE" value="下架关键字功能，上架表单页面取消功能，修复对话界面按enter键后ai对话不返回的bug" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
