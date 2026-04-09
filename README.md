@@ -64,7 +64,7 @@
 
 6. **运行应用:**
    ```bash
-   python app.py
+   python manage.py runserver
    ```
    > 网站默认在 `http://localhost:8000` 上运行.
 
@@ -156,7 +156,7 @@ Structured, Secure, and Smart LLM Chat Management System
 
 5. **Run the application:**
    ```bash
-   python app.py
+   python manage.py runserver
    ```
    > The server will start on `http://localhost:8000` by default.
 
