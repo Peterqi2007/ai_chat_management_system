@@ -229,6 +229,7 @@ INSTALLED_APPS = [
     #其他应用
     "taggit",
     "mezzanine.accounts",
+    "django_bootstrap5",
 
     "django.contrib.admin",
     "django.contrib.auth",

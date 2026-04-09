@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="更正folder_detail url,更改主页标题" />
+    <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="requirement">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,7 +27,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="api_fix" />
+        <entry key="$PROJECT_DIR$" value="not_stream" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -32,12 +38,12 @@
     &quot;assignee&quot;: &quot;Peterqi2007&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Peterqi2007/ai_secure_chat.git&quot;,
-    &quot;accountId&quot;: &quot;1e01038f-091e-4914-a304-d447931c11f5&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Peterqi2007/ai_chat_management_system.git",
+    "accountId": "1e01038f-091e-4914-a304-d447931c11f5"
   }
-}</component>
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -55,7 +61,7 @@
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;not__stream&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
   }
 }</component>
@@ -226,7 +232,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775653877093</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary=".">
+      <option name="closed" value="true" />
+      <created>1775654388640</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1775654388640</updated>
+    </task>
+    <task id="LOCAL-00020" summary="requirement">
+      <option name="closed" value="true" />
+      <created>1775659766168</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1775659766168</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -248,7 +270,9 @@
     <MESSAGE value="下架取消功能，美化样式" />
     <MESSAGE value="下架关键字功能，上架表单页面取消功能，修复对话界面按enter键后ai对话不返回的bug" />
     <MESSAGE value="更正folder_detail url,更改主页标题" />
-    <option name="LAST_COMMIT_MESSAGE" value="更正folder_detail url,更改主页标题" />
+    <MESSAGE value="." />
+    <MESSAGE value="requirement" />
+    <option name="LAST_COMMIT_MESSAGE" value="requirement" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
