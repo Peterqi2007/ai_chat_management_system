@@ -12,7 +12,7 @@ from .forms import (
 )
 # 保留你已有的流式对话视图
 from django.http import StreamingHttpResponse
-from .services import stream_chat_completion
+from .services import stream_chat_completion, iter_qwen_stream_text
 import json
 import time
 import sys
@@ -20,6 +20,76 @@ import sys
 
 # 导入你的千问API非流式函数
 from .services import chat_completion
+
+
+# ==============================================
+# ✅ 流式对话视图（SSE）
+# 关键点：
+# 1. content_type="text/event-stream"，浏览器 fetch+ReadableStream 能逐块读
+# 2. 响应头 X-Accel-Buffering:no、Cache-Control:no-cache 关掉所有代理/中间件缓冲
+# 3. 生成器第一句先 yield 一个 ": ping\n\n" SSE 注释把 WSGI 缓冲顶开，
+#    让浏览器立刻拿到第一批字节，触发 reader.read()
+# 4. 所有异常在 services.iter_qwen_stream_text 内部已转为 ("error", msg)
+#    再转成 SSE 事件喂给前端，不会出现"200 + 空 body"
+# 5. 完整 AI 回复在流结束后 **一次性** 落库，避免边流边写 DB 的事务问题
+# ==============================================
+@login_required
+@require_POST
+def chat_stream(request, chat_id):
+    user_message = request.POST.get("message", "").strip()
+    chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
+
+    if not user_message:
+        def _empty():
+            yield "data: " + json.dumps({"error": "消息不能为空"}) + "\n\n"
+            yield "event: done\ndata: {}\n\n"
+        resp = StreamingHttpResponse(_empty(), content_type="text/event-stream; charset=utf-8")
+        resp["Cache-Control"] = "no-cache"
+        resp["X-Accel-Buffering"] = "no"
+        return resp
+
+    # 先把用户消息落库（非流式、瞬时完成）
+    ChatMessage.objects.create(chat_entry=chat_entry, role="user", content=user_message)
+
+    def sse_generator():
+        # 0) 顶开 WSGI/中间件缓冲：一条 SSE 注释，浏览器会忽略但会触发 reader.read
+        yield ": ping\n\n"
+        sys.stdout.write("[chat_stream] 已发送首条 ping\n"); sys.stdout.flush()
+
+        full_text = ""
+        try:
+            for event_type, payload in iter_qwen_stream_text(chat_entry, user_message):
+                if event_type == "delta":
+                    full_text += payload
+                    yield "data: " + json.dumps({"content": payload}, ensure_ascii=False) + "\n\n"
+                elif event_type == "error":
+                    sys.stdout.write(f"[chat_stream] error: {payload}\n"); sys.stdout.flush()
+                    yield "data: " + json.dumps({"error": payload}, ensure_ascii=False) + "\n\n"
+                elif event_type == "done":
+                    if payload:  # payload 为完整文本（若生成器成功）
+                        full_text = payload
+                    break
+        except Exception as e:
+            # 最后兜底，理论上 iter_qwen_stream_text 内部已经处理过
+            yield "data: " + json.dumps({"error": f"服务器异常：{e}"}, ensure_ascii=False) + "\n\n"
+
+        # 流结束后保存 AI 回复
+        try:
+            if full_text.strip():
+                ChatMessage.objects.create(chat_entry=chat_entry, role="assistant", content=full_text)
+        except Exception as e:
+            sys.stdout.write(f"[chat_stream] 保存 AI 消息失败: {e}\n"); sys.stdout.flush()
+
+        # 显式结束事件，前端据此关闭 reader
+        yield "event: done\ndata: " + json.dumps({"ok": True}) + "\n\n"
+        sys.stdout.write("[chat_stream] 流式结束\n"); sys.stdout.flush()
+
+    resp = StreamingHttpResponse(sse_generator(), content_type="text/event-stream; charset=utf-8")
+    resp["Cache-Control"] = "no-cache"
+    resp["X-Accel-Buffering"] = "no"
+    # 关掉 gzip/压缩中间件对该响应的处理
+    resp["Content-Encoding"] = "identity"
+    return resp
 
 @login_required
 @require_POST

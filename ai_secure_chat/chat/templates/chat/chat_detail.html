@@ -93,7 +93,7 @@
     <form class="chat-input" id="chatForm">
         {% csrf_token %}
         <textarea class="form-control flex-grow-1" id="userMessage" name="message" placeholder="输入消息..." rows="1" required></textarea>
-        <button type="submit" class="btn btn-primary send-btn">发送</button>
+        <button type="button" id="sendBtn" class="btn btn-primary send-btn">发送</button>
     </form>
 
     <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
@@ -103,12 +103,15 @@
     const chatContainer = document.getElementById('chatContainer');
     const loadingBubble = document.getElementById('loadingBubble');
 
+    // 发送锁：防止 Enter / 点击 / 表单默认行为等任何路径导致的重复请求
+    let isSending = false;
+
     // ========== 核心1：处理Enter键逻辑（保留发送+Shift换行） ==========
     userMessage.addEventListener('keydown', (e) => {
-        // 纯Enter键（未按Shift）：提交表单
+        // 纯Enter键（未按Shift）：发送消息
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault(); // 阻止默认换行行为
-            chatForm.dispatchEvent(new Event('submit')); // 主动触发表单提交
+            sendMessage();      // 直接调用同一发送函数，不走 form submit
         }
         // Shift+Enter：允许换行并自适应文本框高度
         else if (e.key === 'Enter' && e.shiftKey) {
@@ -122,6 +125,12 @@
             // 自适应文本框高度
             userMessage.rows = Math.min(userMessage.scrollHeight / 20, 6) || 1; // 限制最大行数
         }
+    });
+
+    // 点击按钮发送（按钮是 type="button"，不会触发 form 原生提交）
+    sendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        sendMessage();
     });
 
     // ========== 核心2：优化消息添加逻辑 ==========
@@ -140,51 +149,87 @@
     chatForm.onsubmit = async (e) => {
         e.preventDefault();
         const msg = userMessage.value.trim();
-        if (!msg) return; // 空消息不提交
+        if (!msg) return;
 
-        // 1. 显示用户消息 + 重置输入框
+        isSending = true;
+        sendBtn.disabled = true;
+
+        // 1. 用户消息气泡
         addMessage(msg, true);
         userMessage.value = '';
-        userMessage.rows = 1; // 重置输入框高度
-        loadingBubble.style.display = 'block'; // 显示加载状态
+        userMessage.rows = 1;
+        loadingBubble.style.display = 'block';
+
+        const formData = new FormData();
+        formData.append('message', msg);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        let aiBubble = null;         // 懒创建，第一段文字到了才 new
+        let fullText = '';
 
         try {
-            const formData = new FormData();
-            formData.append('message', msg);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-            const res = await fetch("{% url 'chat:chat_send' chat_entry.id %}", {
+            const res = await fetch("{% url 'chat:chat_stream' chat_entry.id %}", {
                 method: 'POST',
                 body: formData,
-                credentials: 'include', // 确保携带cookie（csrf验证）
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest' // 标记AJAX请求（后端可识别）
-                }
+                credentials: 'include',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
+            if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
 
-            // 校验响应状态
-            if (!res.ok) {
-                throw new Error(`HTTP错误：${res.status} ${res.statusText}`);
-            }
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
 
-            const data = await res.json();
-            loadingBubble.style.display = 'none'; // 隐藏加载状态
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
 
-            // 2. 处理后端响应
-            if (data.status === 'success' && data.ai_content) {
-                addMessage(data.ai_content, false); // 显示AI消息
-            } else {
-                // 后端返回错误提示
-                addMessage(`请求失败：${data.msg || '未知错误'}`, false);
-                console.error('后端返回错误：', data);
+                // SSE 以空行分割一个事件
+                let idx;
+                while ((idx = buffer.indexOf('\n\n')) >= 0) {
+                    const rawEvent = buffer.slice(0, idx);
+                    buffer = buffer.slice(idx + 2);
+
+                    // 忽略注释行（以 ':' 开头，比如服务端的 ping）
+                    const lines = rawEvent.split('\n').filter(l => !l.startsWith(':'));
+                    let eventName = 'message';
+                    let dataStr = '';
+                    for (const line of lines) {
+                        if (line.startsWith('event:')) eventName = line.slice(6).trim();
+                        else if (line.startsWith('data:')) dataStr += line.slice(5).trim();
+                    }
+                    if (!dataStr) continue;
+
+                    let payload;
+                    try { payload = JSON.parse(dataStr); }
+                    catch (e) { console.warn('SSE JSON 解析失败:', dataStr); continue; }
+
+                    if (eventName === 'done') {
+                        console.log('[SSE] 流结束', payload);
+                        continue;
+                    }
+                    if (payload.error) {
+                        loadingBubble.style.display = 'none';
+                        if (!aiBubble) aiBubble = createAiBubble();
+                        aiBubble.innerHTML += `<span style="color:#dc3545;">[错误] ${payload.error}</span>`;
+                        continue;
+                    }
+                    if (payload.content) {
+                        loadingBubble.style.display = 'none';
+                        if (!aiBubble) aiBubble = createAiBubble();
+                        fullText += payload.content;
+                        aiBubble.innerHTML = fullText.replace(/\n/g, '<br>');
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
+                }
             }
         } catch (err) {
-            // 网络/解析错误处理
             loadingBubble.style.display = 'none';
             addMessage(`网络/解析错误：${err.message}`, false);
             console.error('请求异常：', err);
         }
-    };
+    }
 
     // 初始化：滚动到最新消息位置
     window.onload = () => {
