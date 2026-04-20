@@ -16,10 +16,18 @@ from .services import stream_chat_completion, iter_qwen_stream_text
 import json
 import time
 import sys
+import itertools
 
 
 # 导入你的千问API非流式函数
 from .services import chat_completion
+
+
+# ========== 诊断用：统计 chat_stream 被调用了多少次 ==========
+# 用途：如果前端一次点击触发了 2 次 fetch，这里序号会连增 2；
+# 如果 Django 只进来 1 次，序号只+1。runserver 是单进程 + StatReloader
+# 多线程的，全局 counter 足以区分"一次点击到底走进几次视图"。
+_CHAT_STREAM_ENTER_COUNTER = itertools.count(1)
 
 
 # ==============================================
@@ -36,6 +44,15 @@ from .services import chat_completion
 @login_required
 @require_POST
 def chat_stream(request, chat_id):
+    _enter_seq = next(_CHAT_STREAM_ENTER_COUNTER)
+    sys.stdout.write(
+        f"\n>>>>> [chat_stream ENTER #{_enter_seq}] "
+        f"chat_id={chat_id} user_id={request.user.id} "
+        f"ts={time.strftime('%H:%M:%S')} "
+        f"msg_len={len(request.POST.get('message', ''))}\n"
+    )
+    sys.stdout.flush()
+
     user_message = request.POST.get("message", "").strip()
     chat_entry = get_object_or_404(ChatEntry, id=chat_id, user=request.user)
 

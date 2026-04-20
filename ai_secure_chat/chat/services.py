@@ -10,9 +10,19 @@ from openai import (
 from django.conf import settings
 from .models import UserProfile, ChatEntry, ChatMessage
 import logging
+import itertools
+import sys
+import time
 
 # 配置日志（便于排查请求链路问题）
 logger = logging.getLogger(__name__)
+
+# ========== 诊断用：统计真正打到 DashScope 的 HTTP 请求次数 ==========
+# 每次 client.chat.completions.create(stream=True) 前 +1 并 print。
+# 如果"视图进入 1 次、这里 +2"，就是 SDK 在重试（理论上 max_retries=0 已堵）。
+# 如果"视图进入 1 次、这里 +1"，Python 代码只发了 1 次 HTTP 到阿里云，
+# DashScope 却仍显示 2 次，就跟当前代码无关（口径、缓存、或页面里跑了 2 次）。
+_QWEN_CREATE_COUNTER = itertools.count(1)
 
 # ==============================================
 # 千问API 核心配置（固定，官方要求）
@@ -55,7 +65,7 @@ def get_qwen_client(user):
         client = OpenAI(
             api_key=profile.api_key,
             base_url=QWEN_BASE_URL,
-            max_retries=2,
+            max_retries=0,
         )
         logger.info(f"[千问客户端初始化成功] 用户ID: {user.id}")
         return client
@@ -182,10 +192,18 @@ def iter_qwen_stream_text(chat_entry: "ChatEntry", user_message: str):
     messages = [{"role": "system", "content": chat_entry.system_prompt}]
     for msg in chat_entry.messages.all():
         messages.append({"role": msg.role, "content": msg.content})
-    messages.append({"role": "user", "content": user_message})
+    # messages.append({"role": "user", "content": user_message})
 
     full_text_parts = []
     try:
+        _create_seq = next(_QWEN_CREATE_COUNTER)
+        sys.stdout.write(
+            f"===== [qwen.create #{_create_seq}] "
+            f"chat_id={chat_entry_id} user_id={user_id} "
+            f"ts={time.strftime('%H:%M:%S')} "
+            f"msgs_len={len(messages)} max_retries=0\n"
+        )
+        sys.stdout.flush()
         stream = client.chat.completions.create(
             model=DEFAULT_MODEL,
             messages=messages,
