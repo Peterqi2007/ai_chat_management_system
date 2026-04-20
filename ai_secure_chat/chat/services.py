@@ -10,9 +10,19 @@ from openai import (
 from django.conf import settings
 from .models import UserProfile, ChatEntry, ChatMessage
 import logging
+import itertools
+import sys
+import time
 
 # 配置日志（便于排查请求链路问题）
 logger = logging.getLogger(__name__)
+
+# ========== 诊断用：统计真正打到 DashScope 的 HTTP 请求次数 ==========
+# 每次 client.chat.completions.create(stream=True) 前 +1 并 print。
+# 如果"视图进入 1 次、这里 +2"，就是 SDK 在重试（理论上 max_retries=0 已堵）。
+# 如果"视图进入 1 次、这里 +1"，Python 代码只发了 1 次 HTTP 到阿里云，
+# DashScope 却仍显示 2 次，就跟当前代码无关（口径、缓存、或页面里跑了 2 次）。
+_QWEN_CREATE_COUNTER = itertools.count(1)
 
 # ==============================================
 # 千问API 核心配置（固定，官方要求）
@@ -48,9 +58,14 @@ def get_qwen_client(user):
             raise ValueError(error_msg)
 
         # 初始化千问客户端（官方标准写法）
+        # ⚠️ max_retries=0：OpenAI Python SDK 2.x 默认 max_retries=2，遇到网络抖动 /
+        # 5xx / 408 / 429 会静默重试。流式连接尤其敏感，会导致 Django 视图只跑一次
+        # 但阿里云 DashScope 那边被计为 2 次调用。这里显式关闭 SDK 层重试，
+        # 所有重试行为交给上层业务显式决定。
         client = OpenAI(
             api_key=profile.api_key,
-            base_url=QWEN_BASE_URL
+            base_url=QWEN_BASE_URL,
+            max_retries=0,
         )
         logger.info(f"[千问客户端初始化成功] 用户ID: {user.id}")
         return client
@@ -145,6 +160,108 @@ def stream_chat_completion(chat_entry: ChatEntry, user_message: str):
         error_msg = f"千问API调用未知失败：{str(e)} | 请检查API Key、网络、模型参数等配置"
         logger.error(f"[千问流式API调用失败] {error_msg} | 对话ID: {chat_entry_id} | 用户ID: {user_id}")
         raise Exception(error_msg)
+
+
+# ==============================================
+# 2.1 真·流式文本生成器（视图直接消费）
+# 所有异常都在内部吞掉并 yield 成 ("error", msg) 事件，
+# 绝不向外 raise，避免 StreamingHttpResponse 吞掉异常
+# 让前端什么也看不到的经典坑。
+# 返回的是 (event_type, payload) 元组：
+#   ("delta", "<片段文本>") —— 正常的文本增量
+#   ("error", "<错误描述>") —— 调 API / 解析 chunk 失败
+#   ("done",  "<完整回复>") —— 流结束，附带拼好的完整文本
+# ==============================================
+def iter_qwen_stream_text(chat_entry: "ChatEntry", user_message: str):
+    user_id = chat_entry.user.id
+    chat_entry_id = chat_entry.id
+    logger.info(f"[流式对话开始] chat_id={chat_entry_id} user_id={user_id}")
+
+    try:
+        client = get_qwen_client(chat_entry.user)
+    except Exception as e:
+        yield ("error", f"初始化千问客户端失败：{e}")
+        yield ("done", "")
+        return
+
+    # ⚠️ chat_stream 视图已经在调用本函数前 ChatMessage.objects.create(user_message)
+    # 把这条用户消息落库了；这里只要遍历 chat_entry.messages.all() 即可，
+    # **千万不要再 append 一次 user_message**，否则发给千问的 messages
+    # 列表里同一条 user 会出现 2 次（历史对话 + 重复追加），既污染上下文，
+    # 也会让阿里云 DashScope 日志看起来像被调用了 2 次。
+    messages = [{"role": "system", "content": chat_entry.system_prompt}]
+    for msg in chat_entry.messages.all():
+        messages.append({"role": msg.role, "content": msg.content})
+    # messages.append({"role": "user", "content": user_message})
+
+    full_text_parts = []
+    try:
+        _create_seq = next(_QWEN_CREATE_COUNTER)
+        sys.stdout.write(
+            f"===== [qwen.create #{_create_seq}] "
+            f"chat_id={chat_entry_id} user_id={user_id} "
+            f"ts={time.strftime('%H:%M:%S')} "
+            f"msgs_len={len(messages)} max_retries=0\n"
+        )
+        sys.stdout.flush()
+        stream = client.chat.completions.create(
+            model=DEFAULT_MODEL,
+            messages=messages,
+            temperature=chat_entry.temperature,
+            top_p=chat_entry.top_p,
+            max_tokens=chat_entry.max_tokens,
+            stream=True,
+        )
+    except AuthenticationError as e:
+        yield ("error", f"API Key 认证失败：{e}")
+        yield ("done", "")
+        return
+    except RateLimitError as e:
+        yield ("error", f"触发频率/额度限制：{e}")
+        yield ("done", "")
+        return
+    except APIConnectionError as e:
+        yield ("error", f"网络连接失败：{e}")
+        yield ("done", "")
+        return
+    except NotFoundError as e:
+        yield ("error", f"模型/接口不存在：{e}")
+        yield ("done", "")
+        return
+    except APIError as e:
+        yield ("error", f"千问服务异常：{e}")
+        yield ("done", "")
+        return
+    except Exception as e:
+        yield ("error", f"建立流式连接失败：{e}")
+        yield ("done", "")
+        return
+
+    try:
+        for chunk in stream:
+            try:
+                choice = chunk.choices[0] if chunk.choices else None
+                if not choice:
+                    continue
+                delta = getattr(choice, "delta", None)
+                piece = getattr(delta, "content", None) if delta else None
+                if piece:
+                    full_text_parts.append(piece)
+                    yield ("delta", piece)
+            except Exception as inner:
+                # 单个 chunk 坏了不要中断整体流
+                logger.warning(f"[流式 chunk 解析异常] {inner}")
+                continue
+    except Exception as e:
+        yield ("error", f"读取流中断：{e}")
+    finally:
+        # 关闭底层 HTTP 连接，避免连接泄漏
+        try:
+            stream.close()
+        except Exception:
+            pass
+
+    yield ("done", "".join(full_text_parts))
 
 
 # ==============================================

@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d11e4c95-0a99-4a41-83d0-9039d98612c3" name="更改" comment="requirement">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/ai_secure_chat/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/chat_entry_info.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/ai_secure_chat/chat/templates/chat/folder_list.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +23,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="not_stream" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -38,12 +34,33 @@
     &quot;assignee&quot;: &quot;Peterqi2007&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Peterqi2007/ai_chat_management_system.git",
-    "accountId": "1e01038f-091e-4914-a304-d447931c11f5"
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDORug8cM7Q_NvB&quot;,
+        &quot;number&quot;: 2
+      },
+      &quot;lastSeen&quot;: 1775701475923
+    }
+  ]
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Peterqi2007/ai_chat_management_system.git&quot;,
+    &quot;accountId&quot;: &quot;1e01038f-091e-4914-a304-d447931c11f5&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;Peterqi2007&quot;,
+    &quot;repository&quot;: &quot;ai_chat_management_system&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -55,16 +72,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/ai_secure_chat&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "E:/ai_secure_chat",
+    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\ai_secure_chat" />
@@ -248,7 +266,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775659766168</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="美化样式">
+      <option name="closed" value="true" />
+      <created>1775698986705</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1775698986705</updated>
+    </task>
+    <task id="LOCAL-00022" summary="requirement">
+      <option name="closed" value="true" />
+      <created>1775699504106</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1775699504106</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -271,6 +305,7 @@
     <MESSAGE value="下架关键字功能，上架表单页面取消功能，修复对话界面按enter键后ai对话不返回的bug" />
     <MESSAGE value="更正folder_detail url,更改主页标题" />
     <MESSAGE value="." />
+    <MESSAGE value="美化样式" />
     <MESSAGE value="requirement" />
     <option name="LAST_COMMIT_MESSAGE" value="requirement" />
   </component>
