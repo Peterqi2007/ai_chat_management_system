@@ -189,6 +189,20 @@
             background: rgba(255, 255, 255, 0.55);
             border: 1px solid var(--glass-border);
             border-radius: 999px;
+            text-decoration: none;
+            transition: all .18s ease;
+            cursor: pointer;
+        }
+        a.user-chip:hover {
+            background: rgba(31, 107, 238, 0.10);
+            border-color: rgba(31, 107, 238, 0.35);
+            color: var(--brand-700);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(31,107,238,0.15);
+        }
+        a.user-chip:focus-visible {
+            outline: 2px solid var(--brand-500);
+            outline-offset: 2px;
         }
         .logout-form { display: inline; }
         .logout-form button {
@@ -542,10 +556,11 @@
 
         <nav class="nav-actions" aria-label="账户操作">
             {% if request.user.is_authenticated %}
-                <span class="user-chip" title="{{ request.user.username }}">
+                <a class="user-chip" href="{% url 'profile_update' %}"
+                   title="查看 / 编辑资料 — {{ request.user.username }}">
                     <i class="fa-solid fa-user-astronaut"></i>
                     <span>{{ request.user.username }}</span>
-                </span>
+                </a>
                 <form method="post" action="{% url 'logout' %}" class="logout-form">
                     {% csrf_token %}
                     <button type="submit" aria-label="登出">
