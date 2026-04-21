@@ -19,9 +19,13 @@
 - **Web界面**：使用HTML和JavaScript构建的直观仪表盘，用于聊天管理。
 
 <br>
-界面预览:   
+界面预览:  
+
+   ![index](./index.jpeg)
    
    ![folder_detail](./folder_detail.jpeg)
+
+   ![chat_detail](./chat_detail.jpeg)
    
 ---
 
