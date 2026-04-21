@@ -17,6 +17,7 @@ import json
 import time
 import sys
 import itertools
+from urllib.parse import urlparse
 
 
 # 导入你的千问API非流式函数
@@ -374,12 +375,24 @@ def chat_entry_info(request, chat_id):
     temp_session_key = f'private_chat_once_{chat_id}'
 
     # ========== 隐私对话校验 ==========
+    # 放行条件（满足其一即可）：
+    #   1) session 里有刚输过密码留下的一次性 token → 消费后放行
+    #   2) 请求的 Referer 指向同一对话的 chat_detail → 视作"从对话页返回信息页"，放行
+    # 两条都不满足 → 跳转到密码验证页
+    # 这样用户在 chat_detail 与 chat_entry_info 之间来回切换无需重复输入密码；
+    # 但只要离开 info 去了其它页面再回来，Referer 不再是 chat_detail，就会重新要求密码。
     if chat_entry.is_private:
-        # 仅当 没有一次性标记时，跳转到密码页
-        if not request.session.get(temp_session_key, False):
-            return redirect('chat:chat_verify_privacy', chat_id=chat_id)
-        # ✅ 验证通过后，立即删除标记（下次进入必须重新输密码）
-        del request.session[temp_session_key]
+        if request.session.get(temp_session_key, False):
+            # 一次性 token 消费，下次再来直接输密码
+            del request.session[temp_session_key]
+        else:
+            referer_path = urlparse(request.META.get('HTTP_REFERER', '')).path
+            detail_path = reverse('chat:chat_detail', args=[chat_id])
+            # 用 endswith 兼容 i18n_patterns 带语言前缀的 URL（如 /zh-hans/...）
+            came_from_detail = bool(referer_path) and referer_path.endswith(detail_path)
+            if not came_from_detail:
+                return redirect('chat:chat_verify_privacy', chat_id=chat_id)
+            # 来自 chat_detail，免密放行；不写入任何 session 状态
 
     # 标记：从info页准备进入对话（用于chat_detail权限校验）
     request.session[f'from_info_{chat_id}'] = True

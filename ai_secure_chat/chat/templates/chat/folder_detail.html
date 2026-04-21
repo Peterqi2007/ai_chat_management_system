@@ -1,121 +1,101 @@
 {% extends "base.html" %}
-{% block title %}文件夹{% endblock %}
+{% block title %}{{ parent_folder.name }} · 文件夹详情{% endblock %}
 
 {% block main %}
-<!-- 主容器 - 增加最大宽度限制，居中显示 -->
-<div class="container-fluid py-5" style="max-width: 900px;">
-    <!-- 返回按钮区域 - 美化按钮样式，增加间距 -->
-    <div class="mb-4 d-flex gap-3">
-        <a href="{% url 'chat:folder_list' category.id %}" class="btn btn-outline-secondary btn-sm px-4 py-2 rounded-3">
-            <i class="bi bi-arrow-left me-1"></i> 返回根文件夹
-        </a>
-        <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm px-4 py-2 rounded-3">
-            <i class="bi bi-arrow-return-left me-1"></i> 返回上一页
-        </a>
-    </div>
+<div class="container py-4">
 
-    <!-- 文件夹标题区域 - 增加视觉层次 -->
-    <div class="mb-5">
-        <h2 class="text-primary fw-bold">
-            <i class="bi bi-folder-fill me-2"></i> {{ parent_folder.name }}
-        </h2>
-        <p class="text-muted">
-            <span class="fw-medium">所属分类：</span> {{ category.name }}
-        </p>
-        <!-- 分割线 -->
-        <hr class="mt-2 mb-0 text-secondary opacity-25">
-    </div>
-
-    <!-- 子文件夹卡片 - 竖排布局，占整宽 -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
-        <div class="card-header bg-primary bg-opacity-10 fw-semibold text-primary py-3">
-            <i class="bi bi-folder-plus me-2"></i> 子文件夹
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h3 class="text-primary fw-bold mb-1">
+                <i class="fa-solid fa-folder-open me-2"></i>{{ parent_folder.name }}
+            </h3>
+            <div class="text-muted small">
+                <i class="fa-solid fa-tag me-1"></i>所属分类：{{ category.name }}
+            </div>
         </div>
-        <div class="card-body p-4">
-            {% if subfolders %}
-                <div class="d-flex flex-column gap-2">
-                    {% for sub in subfolders %}
-                    <a href="{% url 'chat:folder_detail' category.id sub.id %}"
-                       class="btn btn-outline-primary rounded-3 py-2 text-start hover-scale transition-all">
-                        <i class="bi bi-folder me-3"></i> {{ sub.name }}
-                    </a>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-folder-x fs-4 mb-2"></i>
-                    <p class="mb-0">暂无子文件夹</p>
-                </div>
-            {% endif %}
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'chat:folder_list' category.id %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> 返回根文件夹
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-rotate-left me-1"></i> 返回上一页
+            </a>
         </div>
     </div>
 
-    <!-- 对话列表卡片 - 竖排布局，占整宽 -->
-    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-        <div class="card-header bg-success bg-opacity-10 fw-semibold text-success py-3">
-            <i class="bi bi-chat-dots me-2"></i> 对话列表
+    <div class="row g-4 mb-4">
+        {# 子文件夹卡片 #}
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <i class="fa-solid fa-folder-plus me-2"></i>子文件夹
+                </div>
+                <div class="card-body">
+                    {% if subfolders %}
+                        <div class="d-flex flex-column gap-2">
+                            {% for sub in subfolders %}
+                            <a href="{% url 'chat:folder_detail' category.id sub.id %}"
+                               class="btn btn-outline-primary text-start">
+                                <i class="fa-solid fa-folder me-2"></i>{{ sub.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-folder-open fs-3 mb-2 d-block"></i>
+                            暂无子文件夹
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="card-body p-4">
-            {% if chat_entries %}
-                <div class="d-flex flex-column gap-2">
-                    {% for chat in chat_entries %}
-                    <a href="{% url 'chat:chat_entry_info' chat.id %}"
-                       class="btn btn-outline-success rounded-3 py-2 text-start hover-scale transition-all">
-                        <i class="bi bi-chat-left me-3"></i> {{ chat.title }}
-                    </a>
-                    {% endfor %}
+
+        {# 对话列表卡片 #}
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-success bg-opacity-10">
+                    <i class="fa-solid fa-comments me-2"></i>对话列表
                 </div>
-            {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-chat-x fs-4 mb-2"></i>
-                    <p class="mb-0">暂无对话记录</p>
+                <div class="card-body">
+                    {% if chat_entries %}
+                        <div class="d-flex flex-column gap-2">
+                            {% for chat in chat_entries %}
+                            <a href="{% url 'chat:chat_entry_info' chat.id %}"
+                               class="btn btn-outline-success text-start">
+                                <i class="fa-regular fa-comment me-2"></i>{{ chat.title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa-regular fa-comment-dots fs-3 mb-2 d-block"></i>
+                            暂无对话记录
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 
-        <!-- 新增功能按钮区域 -->
-    <div class="mt-5 d-flex gap-3 flex-wrap">
-        <!-- 新建文件夹按钮 - 传递分类ID和父文件夹ID作为GET参数 -->
+    {# 操作按钮 #}
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{% url 'chat:folder_create' %}?category_id={{ category.id }}&parent_folder_id={{ parent_folder.id }}"
-           class="btn btn-primary px-4 py-2 rounded-3 hover-scale transition-all">
-            <i class="bi bi-folder-plus me-1"></i> 新建文件夹
+           class="btn btn-primary">
+            <i class="fa-solid fa-folder-plus me-1"></i> 新建子文件夹
         </a>
-        <!-- 新建对话按钮 - 传递文件夹ID作为GET参数 -->
         <a href="{% url 'chat:chat_entry_create' %}?folder_id={{ parent_folder.id }}"
-           class="btn btn-success px-4 py-2 rounded-3 hover-scale transition-all">
-            <i class="bi bi-chat-plus me-1"></i> 新建对话
+           class="btn btn-success">
+            <i class="fa-solid fa-comment-medical me-1"></i> 新建对话
         </a>
-        <!-- 编辑文件夹按钮 - 传递文件夹PK（ID） -->
         <a href="{% url 'chat:folder_update' parent_folder.id %}"
-           class="btn btn-warning px-4 py-2 rounded-3 hover-scale transition-all">
-            <i class="bi bi-pencil me-1"></i> 编辑文件夹
+           class="btn btn-warning">
+            <i class="fa-solid fa-pen me-1"></i> 编辑文件夹
         </a>
-        <!-- 删除文件夹按钮 - 传递文件夹PK（ID）+ 确认提示 -->
         <a href="{% url 'chat:folder_delete' parent_folder.id %}"
            onclick="return confirm('确定要删除该文件夹吗？删除后文件夹内的所有内容将一并删除！')"
-           class="btn btn-danger px-4 py-2 rounded-3 hover-scale transition-all">
-            <i class="bi bi-trash me-1"></i> 删除
+           class="btn btn-danger">
+            <i class="fa-solid fa-trash me-1"></i> 删除文件夹
         </a>
     </div>
-
-    <!-- 自定义样式 - 优化 hover 效果和过渡 -->
-    <style>
-        /* 按钮 hover 缩放效果 */
-        .hover-scale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        /* 过渡动画 */
-        .transition-all {
-            transition: all 0.2s ease;
-        }
-        /* 修复mezzanine可能的样式冲突 */
-        .card-body a.btn {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    </style>
 </div>
 {% endblock %}
