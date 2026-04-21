@@ -1,111 +1,114 @@
 {% extends "base.html" %}
-{% block title %}文件夹{% endblock %}
+{% block title %}{{ category.name|default:"顶级文件夹" }} · 文件夹{% endblock %}
 
 {% block main %}
-<div class="container-fluid">
-    <!-- 页面标题 + 核心操作按钮 -->
-    <div class="mb-4">
-        <h2>{{ category.name|default:"顶级文件夹" }}</h2>
-        <!-- 新建文件夹 + 新建对话 按钮组 -->
-        <div class="mt-2">
-            <a href="{% url 'chat:folder_create' %}" class="btn btn-primary hover-scale transition-all">新建文件夹</a>
-            <a href="{% url 'chat:chat_entry_create' %}" class="btn btn-success hover-scale transition-all">新建对话Entry</a>
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h3 class="text-primary fw-bold mb-1">
+                <i class="fa-solid fa-folder-tree me-2"></i>
+                {{ category.name|default:"顶级文件夹" }}
+            </h3>
+            <div class="text-muted small">在该分类下管理文件夹及其中的对话条目。</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'chat:category_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> 返回分类
+            </a>
+            <a href="{% url 'chat:folder_create' %}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-folder-plus me-1"></i> 新建文件夹
+            </a>
+            <a href="{% url 'chat:chat_entry_create' %}" class="btn btn-success btn-sm">
+                <i class="fa-solid fa-comment-medical me-1"></i> 新建对话
+            </a>
         </div>
     </div>
 
-    <!-- 文件夹列表 -->
     {% for folder in folders %}
-    <div class="card mb-3">
+    <div class="card mb-4">
         <div class="card-body">
-            <!-- 文件夹名称 + 操作按钮 -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="card-title mb-0">{{ folder.name }}</h3>
-                <div>
-                    <!-- 进入子文件夹按钮（核心新增） -->
-                    <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-sm btn-info hover-scale transition-all me-2">进入子文件夹</a>
-                    <a href="{% url 'chat:folder_update' folder.id %}" class="btn btn-sm btn-warning hover-scale transition-all me-2">编辑</a>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-folder text-primary me-2"></i>{{ folder.name }}
+                </h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-sm btn-info">
+                        <i class="fa-solid fa-arrow-right me-1"></i> 进入
+                    </a>
+                    <a href="{% url 'chat:folder_update' folder.id %}" class="btn btn-sm btn-warning">
+                        <i class="fa-solid fa-pen me-1"></i> 编辑
+                    </a>
                     <a href="{% url 'chat:folder_delete' folder.id %}"
-                        onclick="return confirm('确定要删除该文件夹吗？删除后文件夹内的所有内容将一并删除！')"
-                        class="btn btn-sm btn-danger px-4 py-2 rounded-3 hover-scale transition-all me-2">
-                        <i class="bi bi-trash me-1"></i> 删除
+                       onclick="return confirm('确定要删除该文件夹吗？删除后文件夹内的所有内容将一并删除！')"
+                       class="btn btn-sm btn-danger">
+                        <i class="fa-solid fa-trash me-1"></i> 删除
                     </a>
                 </div>
             </div>
 
-            <!-- 子文件夹列表 -->
-            <div class="mb-4">
-                <h4>子文件夹</h4>
-                {% if folder.child_folders.all %}
-                <div class="row">
-                    {% for child in folder.child_folders.all %}
-                    <div class="col-md-3 mb-2">
-                        <div class="card">
-                            <div class="card-body p-2">
-                                <span class="card-text">{{ child.name }}</span>
-                                <!-- 子文件夹跳转按钮 -->
-                                <a href="{% url 'chat:folder_detail' category.id folder.id %}" class="btn btn-xs btn-info hover-scale transition-all ms-2">进入</a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
+            {# 子文件夹 #}
+            <div class="mb-3">
+                <div class="text-uppercase small fw-semibold text-muted mb-2" style="letter-spacing:1px;">
+                    <i class="fa-solid fa-folder-open me-1"></i>子文件夹
                 </div>
+                {% if folder.child_folders.all %}
+                    <div class="row g-2">
+                        {% for child in folder.child_folders.all %}
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'chat:folder_detail' category.id folder.id %}"
+                               class="btn btn-outline-primary w-100 text-start">
+                                <i class="fa-solid fa-folder me-2"></i>{{ child.name }}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                <p class="text-muted">暂无子文件夹</p>
+                    <div class="text-muted small">暂无子文件夹</div>
                 {% endif %}
             </div>
 
-            <!-- 对话条目列表 -->
+            {# 对话条目 #}
             <div>
-                <h4>对话条目</h4>
+                <div class="text-uppercase small fw-semibold text-muted mb-2" style="letter-spacing:1px;">
+                    <i class="fa-solid fa-comments me-1"></i>对话条目
+                </div>
                 {% if folder.chat_entries.all %}
-                <ul class="list-group">
-                    {% for entry in folder.chat_entries.all %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center ">
-                        <h3 class="card-title mb-0">{{ entry.title }}</h3>
-                        <div>
-                            <a href="{% url 'chat:chat_entry_info' entry.id %}" class="btn btn-sm btn-primary hover-scale transition-all me-2">进入对话</a>
-                            <a href="{% url 'chat:chat_entry_delete' entry.id %}" class="btn btn-sm hover-scale transition-all btn-danger">删除</a>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
+                    <ul class="list-group list-group-flush">
+                        {% for entry in folder.chat_entries.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span><i class="fa-regular fa-comment text-primary me-2"></i>{{ entry.title }}</span>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'chat:chat_entry_info' entry.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fa-solid fa-door-open me-1"></i> 进入
+                                </a>
+                                <a href="{% url 'chat:chat_entry_delete' entry.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fa-solid fa-trash me-1"></i> 删除
+                                </a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
-                <p class="text-muted">暂无对话条目</p>
+                    <div class="text-muted small">暂无对话条目</div>
                 {% endif %}
-                <!-- 针对当前文件夹的「新建对话」按钮（新增） -->
-                <a href="{% url 'chat:chat_entry_create' %}?folder_id={{ folder.id }}" class="btn btn-sm btn-success hover-scale transition-all mt-2">
-                    在此文件夹新建对话
+                <a href="{% url 'chat:chat_entry_create' %}?folder_id={{ folder.id }}"
+                   class="btn btn-sm btn-success mt-3">
+                    <i class="fa-solid fa-plus me-1"></i> 在此文件夹新建对话
                 </a>
             </div>
         </div>
     </div>
-
-    <hr>
     {% empty %}
-    <!-- 无文件夹时的提示 -->
-    <div class="alert alert-info">
-        暂无文件夹，<a href="{% url 'chat:folder_create' %}">点击创建第一个文件夹</a>
+    <div class="card">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="fa-solid fa-folder-open fs-1 mb-3 d-block"></i>
+            <p class="mb-3">该分类下暂无文件夹</p>
+            <a href="{% url 'chat:folder_create' %}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-folder-plus me-1"></i> 创建第一个文件夹
+            </a>
+        </div>
     </div>
     {% endfor %}
-
-    <!-- 自定义样式 - 优化 hover 效果和过渡 -->
-    <style>
-        /* 按钮 hover 缩放效果 */
-        .hover-scale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        /* 过渡动画 */
-        .transition-all {
-            transition: all 0.2s ease;
-        }
-        /* 修复mezzanine可能的样式冲突 */
-        .card-body a.btn {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    </style>
-
 </div>
 {% endblock %}

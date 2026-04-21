@@ -181,7 +181,7 @@ class ChatMessage(models.Model):
         ordering = ["created_at"]  # 按时间正序展示对话
 
     def __str__(self):
-        return f"{self.get_role_display()}：{self.content[:30]}..." #疑似错误点 高度关注
+        return f"{self.get_role_display()}：{self.content[:30]}..."
 
 # ==============================================
 # 6. 大模型参数配置模型（可选：全局/自定义参数模板）

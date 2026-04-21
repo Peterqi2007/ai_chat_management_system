@@ -8,6 +8,9 @@
     <link id="bs-primary" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
           rel="stylesheet"
           onerror="var f=document.createElement('link');f.rel='stylesheet';f.href='https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css';document.head.appendChild(f);">
+    <!-- Markdown 渲染：marked 解析 + DOMPurify 防 XSS -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
     <style>
         * {margin: 0;padding: 0;box-sizing: border-box;}
         body {background-color: #f5f7fa;padding: 20px;}
@@ -117,6 +120,81 @@
             opacity: .65;
             cursor: not-allowed;
         }
+
+        /* ===== 气泡内 Markdown 元素排版（仅作用于 AI 气泡里经 marked 渲染的 HTML） ===== */
+        .chat-bubble p { margin: 0 0 8px 0; }
+        .chat-bubble p:last-child { margin-bottom: 0; }
+        .chat-bubble ul,
+        .chat-bubble ol {
+            margin: 4px 0 8px 0;
+            padding-left: 24px;
+        }
+        .chat-bubble li { margin: 2px 0; line-height: 1.5; }
+        .chat-bubble h1,
+        .chat-bubble h2,
+        .chat-bubble h3,
+        .chat-bubble h4,
+        .chat-bubble h5,
+        .chat-bubble h6 {
+            margin: 8px 0 6px 0;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        .chat-bubble h1 { font-size: 1.3em; }
+        .chat-bubble h2 { font-size: 1.2em; }
+        .chat-bubble h3 { font-size: 1.1em; }
+        .chat-bubble h4,
+        .chat-bubble h5,
+        .chat-bubble h6 { font-size: 1em; }
+        .chat-bubble strong { font-weight: 600; }
+        .chat-bubble em { font-style: italic; }
+        .chat-bubble code {
+            padding: 1px 6px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.92em;
+        }
+        .chat-bubble pre {
+            margin: 6px 0;
+            padding: 10px 12px;
+            background: #0b1021;
+            color: #e6edf3;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .chat-bubble pre code {
+            padding: 0;
+            background: transparent;
+            color: inherit;
+            font-size: 0.9em;
+        }
+        .chat-bubble blockquote {
+            margin: 6px 0;
+            padding: 4px 12px;
+            border-left: 3px solid rgba(0,0,0,0.2);
+            color: inherit;
+            background: rgba(0,0,0,0.03);
+            border-radius: 0 6px 6px 0;
+        }
+        .chat-bubble a {
+            color: inherit;
+            text-decoration: underline;
+        }
+        .chat-bubble table {
+            border-collapse: collapse;
+            margin: 6px 0;
+        }
+        .chat-bubble th,
+        .chat-bubble td {
+            border: 1px solid rgba(0,0,0,0.15);
+            padding: 4px 8px;
+        }
+        /* 用户气泡是蓝底白字，代码块的深色背景在蓝底上太突兀，特别覆盖一下 */
+        .user-bubble code {
+            background: rgba(255,255,255,0.25);
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -159,6 +237,38 @@
     // 发送锁：防止 Enter / 点击 / 表单默认行为等任何路径导致的重复请求
     let isSending = false;
 
+    // ========== Markdown 渲染工具 ==========
+    // marked 开启 GFM + 单行换行（breaks:true）：这样数据库里存的 '\n' 会变成 <br>，
+    // '**bold**' / '- item' / '```code```' 等 Markdown 语法都能正确渲染。
+    if (window.marked && marked.setOptions) {
+        marked.setOptions({ gfm: true, breaks: true });
+    }
+
+    // AI 气泡：走 Markdown，经过 DOMPurify 清洗防 XSS
+    function renderAi(rawText) {
+        const text = rawText == null ? '' : String(rawText);
+        if (window.marked && window.DOMPurify) {
+            const html = marked.parse(text);
+            return DOMPurify.sanitize(html);
+        }
+        // 兜底：CDN 没加载时至少保留换行
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    // 用户气泡：不跑 markdown（避免把用户打的 *星号* 变成斜体），只保留换行
+    function renderUser(rawText) {
+        const text = rawText == null ? '' : String(rawText);
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+    }
+
     // ========== 核心1：处理Enter键逻辑（保留发送+Shift换行） ==========
     userMessage.addEventListener('keydown', (e) => {
         // 纯Enter键（未按Shift）：发送消息
@@ -191,8 +301,8 @@
         if (!text || text.trim() === '') return; // 过滤空消息
         const div = document.createElement('div');
         div.className = isUser ? 'chat-bubble user-bubble' : 'chat-bubble ai-bubble';
-        // 处理换行符（将\n转为<br>）
-        div.innerHTML = text.replace(/\n/g, '<br>');
+        // 用户消息保持原样（只转换行）；AI 消息走 Markdown
+        div.innerHTML = isUser ? renderUser(text) : renderAi(text);
         chatContainer.appendChild(div);
         // 强制滚动到底部（确保消息可见）
         chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -286,7 +396,8 @@
                         loadingBubble.style.display = 'none';
                         if (!aiBubble) aiBubble = createAiBubble();
                         fullText += payload.content;
-                        aiBubble.innerHTML = fullText.replace(/\n/g, '<br>');
+                        // 流式阶段每次把累积的完整文本重新 Markdown 渲染
+                        aiBubble.innerHTML = renderAi(fullText);
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
@@ -304,8 +415,25 @@
     }
 
 
-    // 初始化：滚动到最新消息位置
+    // ========== 初始化：把 Django 模板直出的历史消息重新渲染 ==========
+    // Django 模板 `{{ message.content }}` 会做 HTML 转义但不会把 '\n' 转成 <br>，
+    // 也不会解析 Markdown。这里读 textContent（拿到原始文本，'\n' 仍是 '\n'），
+    // 再用 renderAi / renderUser 回写 innerHTML，这样「退出重进后」看到的排版
+    // 和「流式阶段」完全一致：换行保留、Markdown 渲染到位。
+    function rerenderHistory() {
+        document.querySelectorAll('.chat-bubble.ai-bubble').forEach((el) => {
+            const raw = el.textContent;
+            el.innerHTML = renderAi(raw);
+        });
+        document.querySelectorAll('.chat-bubble.user-bubble').forEach((el) => {
+            const raw = el.textContent;
+            el.innerHTML = renderUser(raw);
+        });
+    }
+
+    // 初始化：重渲染历史 + 滚动到最新消息位置
     window.onload = () => {
+        rerenderHistory();
         chatContainer.scrollTop = chatContainer.scrollHeight;
     };
     </script>
